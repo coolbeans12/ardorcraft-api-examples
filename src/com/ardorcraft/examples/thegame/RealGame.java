@@ -44,6 +44,7 @@ import com.ardorcraft.base.CanvasRelayer;
 import com.ardorcraft.collision.IntersectionResult;
 import com.ardorcraft.data.Pos;
 import com.ardorcraft.generators.NiceDataGenerator;
+import com.ardorcraft.objects.SkyDome;
 import com.ardorcraft.player.PlayerWithPhysics;
 import com.ardorcraft.util.queue.ArdorCraftTaskQueue;
 import com.ardorcraft.world.BlockWorld;
@@ -63,7 +64,7 @@ public class RealGame implements ArdorCraftGame {
 	private final IntersectionResult intersectionResult = new IntersectionResult();
 
 	private final FogState fogState = new FogState();
-	private final ReadOnlyColorRGBA fogColor = new ColorRGBA(0.9f, 0.93f, 1.0f,
+	private final ReadOnlyColorRGBA fogColor = new ColorRGBA(1.0f, 1.0f, 1.0f,
 			1.0f);
 
 	private CanvasRelayer canvas;
@@ -71,6 +72,9 @@ public class RealGame implements ArdorCraftGame {
 	private Camera camera;
 	private PlayerWithPhysics player;
 
+	private Node worldNode;
+	private Node textNode;
+	private SkyDome skyDome;
 	private float globalLight = 1.0f;
 
 	@Override
@@ -82,6 +86,8 @@ public class RealGame implements ArdorCraftGame {
 		camera.setUp(player.getUp());
 		camera.setLeft(player.getLeft());
 
+		skyDome.setTranslation(player.getPosition());
+
 		// The infinite world update
 		blockWorld.updatePosition(player.getPosition());
 		blockWorld.update(timer);
@@ -89,7 +95,13 @@ public class RealGame implements ArdorCraftGame {
 
 	@Override
 	public void render(final Renderer renderer) {
-		root.draw(renderer);
+		// root.draw(renderer);
+
+		// Taking over the drawing to draw in specific order without performance
+		// hogging renderqueue sorting...
+		skyDome.draw(renderer);
+		worldNode.draw(renderer);
+		textNode.draw(renderer);
 	}
 
 	@Override
@@ -137,13 +149,21 @@ public class RealGame implements ArdorCraftGame {
 
 		blockWorld = new BlockWorld(settings);
 
-		root.attachChild(blockWorld.getWorldNode());
+		worldNode = blockWorld.getWorldNode();
+		root.attachChild(worldNode);
 
+		skyDome = new SkyDome("Dome", 8, 8, 10);
+		root.attachChild(skyDome);
+
+		textNode = new Node("text");
+		root.attachChild(textNode);
 		createText("+",
 				canvas.getCanvasRenderer().getCamera().getWidth() / 2 - 5,
 				canvas.getCanvasRenderer().getCamera().getHeight() / 2 - 10);
 		createText("[F] Fly/Walk", 10, 10);
 		createText("[LMB/RMB] Add/Remove block", 10, 30);
+
+		updateLighting();
 
 		blockWorld.startThreads();
 	}
@@ -153,13 +173,17 @@ public class RealGame implements ArdorCraftGame {
 				16);
 		info.getSceneHints().setRenderBucketType(RenderBucketType.Ortho);
 		info.setTranslation(new Vector3(x, y, 0));
-		root.attachChild(info);
+		textNode.attachChild(info);
 	}
 
 	private void updateLighting() {
 		final ReadOnlyColorRGBA newColor = new ColorRGBA(fogColor)
 				.multiplyLocal(globalLight);
 		fogState.setColor(newColor);
+		skyDome.getMidColor().set(newColor);
+		skyDome.getTopColor().set(0.5f, 0.6f, 1.0f, 1.0f)
+				.multiplyLocal(globalLight);
+		skyDome.updateColors();
 
 		GameTaskQueueManager.getManager(ContextManager.getCurrentContext())
 				.getQueue(ArdorCraftTaskQueue.RENDER)
@@ -181,8 +205,6 @@ public class RealGame implements ArdorCraftGame {
 		fogState.setDensityFunction(FogState.DensityFunction.Linear);
 		fogState.setQuality(FogState.Quality.PerPixel);
 		root.setRenderState(fogState);
-
-		updateLighting();
 	}
 
 	private void registerTriggers(final LogicalLayer logicalLayer,
