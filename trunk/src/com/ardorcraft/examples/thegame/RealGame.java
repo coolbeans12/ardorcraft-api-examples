@@ -38,6 +38,7 @@ import com.ardor3d.scenegraph.Node;
 import com.ardor3d.ui.text.BasicText;
 import com.ardor3d.util.GameTaskQueueManager;
 import com.ardor3d.util.ReadOnlyTimer;
+import com.ardor3d.util.resource.ResourceLocatorTool;
 import com.ardorcraft.base.ArdorCraftGame;
 import com.ardorcraft.base.CanvasRelayer;
 import com.ardorcraft.collision.IntersectionResult;
@@ -47,6 +48,7 @@ import com.ardorcraft.player.PlayerWithPhysics;
 import com.ardorcraft.util.queue.ArdorCraftTaskQueue;
 import com.ardorcraft.world.BlockWorld;
 import com.ardorcraft.world.BlockWorld.BlockType;
+import com.ardorcraft.world.WorldSettings;
 
 /**
  * A simple example showing a textured and lit box spinning.
@@ -54,11 +56,9 @@ import com.ardorcraft.world.BlockWorld.BlockType;
 public class RealGame implements ArdorCraftGame {
 
 	private BlockWorld blockWorld;
-	private final int subMeshSize = 16;
+	private final int tileSize = 16;
 	private final int gridSize = 16;
-	private final int width = subMeshSize * gridSize;
-	private final int height = 100;
-	private final double farPlane = (gridSize - 1) / 2 * subMeshSize;
+	private final double farPlane = (gridSize - 1) / 2 * tileSize;
 
 	private final IntersectionResult intersectionResult = new IntersectionResult();
 
@@ -70,8 +70,6 @@ public class RealGame implements ArdorCraftGame {
 	private Node root;
 	private Camera camera;
 	private PlayerWithPhysics player;
-
-	private final boolean updateWorld = true;
 
 	private float globalLight = 1.0f;
 
@@ -85,9 +83,7 @@ public class RealGame implements ArdorCraftGame {
 		camera.setLeft(player.getLeft());
 
 		// The infinite world update
-		if (updateWorld) {
-			blockWorld.updatePosition(player.getPosition());
-		}
+		blockWorld.updatePosition(player.getPosition());
 		blockWorld.update(timer);
 	}
 
@@ -118,13 +114,28 @@ public class RealGame implements ArdorCraftGame {
 
 		registerTriggers(logicalLayer, mouseManager);
 
-		// Create block world
+		// Map file to use
 		final File worldFileSource = new File("world.acr");
+		// Comment away this if you don't want to rebuild the map from scratch
+		// each run.
 		if (worldFileSource.exists()) {
 			worldFileSource.delete();
 		}
-		blockWorld = new BlockWorld(width, height, subMeshSize,
-				new NiceDataGenerator(), worldFileSource);
+
+		// Create main blockworld handler
+		final WorldSettings settings = new WorldSettings();
+		settings.setTerrainTexture(ResourceLocatorTool.locateResource(
+				ResourceLocatorTool.TYPE_TEXTURE, "terrain.png"));
+		settings.setTerrainTextureTileSize(32);
+		settings.setWaterTexture(ResourceLocatorTool.locateResource(
+				ResourceLocatorTool.TYPE_TEXTURE, "water.png"));
+		settings.setTerrainGenerator(new NiceDataGenerator());
+		settings.setMapFile(worldFileSource);
+		settings.setTileSize(tileSize);
+		settings.setTileHeight(100);
+		settings.setGridSize(gridSize);
+
+		blockWorld = new BlockWorld(settings);
 
 		root.attachChild(blockWorld.getWorldNode());
 

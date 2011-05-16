@@ -32,6 +32,7 @@ import com.ardor3d.renderer.state.FogState;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.ui.text.BasicText;
 import com.ardor3d.util.ReadOnlyTimer;
+import com.ardor3d.util.resource.ResourceLocatorTool;
 import com.ardorcraft.base.ArdorCraftGame;
 import com.ardorcraft.base.CanvasRelayer;
 import com.ardorcraft.collision.IntersectionResult;
@@ -41,171 +42,202 @@ import com.ardorcraft.generators.CachedNoiseDataGenerator;
 import com.ardorcraft.player.PlayerWithCollision;
 import com.ardorcraft.world.BlockWorld;
 import com.ardorcraft.world.BlockWorld.BlockType;
+import com.ardorcraft.world.WorldSettings;
 
 /**
  * A simple example showing a textured and lit box spinning.
  */
 public class IntermediateGame implements ArdorCraftGame {
 
-    private BlockWorld blockWorld;
-    private final int subMeshSize = 16;
-    private final int gridSize = 16;
-    private final int width = subMeshSize * gridSize;
-    private final int height = 100;
-    private final double farPlane = (gridSize - 1) / 2 * subMeshSize;
+	private BlockWorld blockWorld;
+	private final int tileSize = 16;
+	private final int gridSize = 16;
+	private final int height = 100;
+	private final double farPlane = (gridSize - 1) / 2 * tileSize;
 
-    private final ReadOnlyColorRGBA fogColor = new ColorRGBA(0.9f, 0.9f, 1.0f, 1.0f);
-    private Node root;
-    private Camera camera;
-    private PlayerWithCollision player;
+	private final ReadOnlyColorRGBA fogColor = new ColorRGBA(0.9f, 0.9f, 1.0f,
+			1.0f);
+	private Node root;
+	private Camera camera;
+	private PlayerWithCollision player;
 
-    @Override
-    public void update(final ReadOnlyTimer timer) {
-        player.update(blockWorld, timer);
+	@Override
+	public void update(final ReadOnlyTimer timer) {
+		player.update(blockWorld, timer);
 
-        camera.setLocation(player.getPosition());
-        camera.setDirection(player.getDirection());
-        camera.setUp(player.getUp());
-        camera.setLeft(player.getLeft());
+		camera.setLocation(player.getPosition());
+		camera.setDirection(player.getDirection());
+		camera.setUp(player.getUp());
+		camera.setLeft(player.getLeft());
 
-        // The infinite world update
-        blockWorld.updatePosition(player.getPosition());
-        blockWorld.update(timer);
-    }
+		// The infinite world update
+		blockWorld.updatePosition(player.getPosition());
+		blockWorld.update(timer);
+	}
 
-    @Override
-    public void render(final Renderer renderer) {
-        root.draw(renderer);
-    }
+	@Override
+	public void render(final Renderer renderer) {
+		root.draw(renderer);
+	}
 
-    @Override
-    public void init(final Node root, final CanvasRelayer canvas, final LogicalLayer logicalLayer,
-            final PhysicalLayer physicalLayer, final MouseManager mouseManager) {
-        this.root = root;
+	@Override
+	public void init(final Node root, final CanvasRelayer canvas,
+			final LogicalLayer logicalLayer, final PhysicalLayer physicalLayer,
+			final MouseManager mouseManager) {
+		this.root = root;
 
-        canvas.setTitle("Intermediate");
-        canvas.getCanvasRenderer().getRenderer().setBackgroundColor(fogColor);
+		canvas.setTitle("Intermediate");
+		canvas.getCanvasRenderer().getRenderer().setBackgroundColor(fogColor);
 
-        camera = canvas.getCanvasRenderer().getCamera();
-        camera.setFrustumPerspective(75.0, (float) camera.getWidth() / (float) camera.getHeight(), 0.1, farPlane);
+		camera = canvas.getCanvasRenderer().getCamera();
+		camera.setFrustumPerspective(75.0, (float) camera.getWidth()
+				/ (float) camera.getHeight(), 0.1, farPlane);
 
-        setupFog();
+		setupFog();
 
-        // Create player object
-        player = new PlayerWithCollision();
-        player.getPosition().set(0, 30, 0);
-        FlyControl.setupTriggers(player, logicalLayer, Vector3.UNIT_Y, false);
+		// Create player object
+		player = new PlayerWithCollision();
+		player.getPosition().set(0, 30, 0);
+		FlyControl.setupTriggers(player, logicalLayer, Vector3.UNIT_Y, false);
 
-        registerTriggers(logicalLayer, mouseManager);
+		registerTriggers(logicalLayer, mouseManager);
 
-        // Create block world
-        blockWorld = new BlockWorld(width, height, subMeshSize, new CachedNoiseDataGenerator(6, subMeshSize, height),
-                null);
+		// Create block world
+		final WorldSettings settings = new WorldSettings();
+		settings.setTerrainTexture(ResourceLocatorTool.locateResource(
+				ResourceLocatorTool.TYPE_TEXTURE, "terrain.png"));
+		settings.setTerrainTextureTileSize(32);
+		settings.setWaterTexture(ResourceLocatorTool.locateResource(
+				ResourceLocatorTool.TYPE_TEXTURE, "water.png"));
+		settings.setTerrainGenerator(new CachedNoiseDataGenerator(6, tileSize,
+				height));
+		settings.setTileSize(tileSize);
+		settings.setTileHeight(height);
+		settings.setGridSize(gridSize);
 
-        root.attachChild(blockWorld.getWorldNode());
+		blockWorld = new BlockWorld(settings);
 
-        final BasicText cross = BasicText.createDefaultTextLabel("Text", "+", 16);
-        cross.getSceneHints().setRenderBucketType(RenderBucketType.Ortho);
-        cross.setTranslation(new Vector3(canvas.getCanvasRenderer().getCamera().getWidth() / 2 - 5, canvas
-                .getCanvasRenderer().getCamera().getHeight() / 2 - 10, 0));
-        root.attachChild(cross);
+		root.attachChild(blockWorld.getWorldNode());
 
-        blockWorld.startThreads();
-    }
+		final BasicText cross = BasicText.createDefaultTextLabel("Text", "+",
+				16);
+		cross.getSceneHints().setRenderBucketType(RenderBucketType.Ortho);
+		cross.setTranslation(new Vector3(canvas.getCanvasRenderer().getCamera()
+				.getWidth() / 2 - 5, canvas.getCanvasRenderer().getCamera()
+				.getHeight() / 2 - 10, 0));
+		root.attachChild(cross);
 
-    private void setupFog() {
-        final FogState fogState = new FogState();
-        fogState.setDensity(1.0f);
-        fogState.setEnabled(true);
-        fogState.setColor(fogColor);
-        fogState.setEnd((float) farPlane);
-        fogState.setStart((float) farPlane / 3.0f);
-        fogState.setDensityFunction(FogState.DensityFunction.Linear);
-        fogState.setQuality(FogState.Quality.PerPixel);
-        root.setRenderState(fogState);
-    }
+		blockWorld.startThreads();
+	}
 
-    private final IntersectionResult intersectionResult = new IntersectionResult();
+	private void setupFog() {
+		final FogState fogState = new FogState();
+		fogState.setDensity(1.0f);
+		fogState.setEnabled(true);
+		fogState.setColor(fogColor);
+		fogState.setEnd((float) farPlane);
+		fogState.setStart((float) farPlane / 3.0f);
+		fogState.setDensityFunction(FogState.DensityFunction.Linear);
+		fogState.setQuality(FogState.Quality.PerPixel);
+		root.setRenderState(fogState);
+	}
 
-    private void registerTriggers(final LogicalLayer logicalLayer, final MouseManager mouseManager) {
-        logicalLayer.registerTrigger(new InputTrigger(new MouseButtonPressedCondition(MouseButton.LEFT),
-                new TriggerAction() {
-                    @Override
-                    public void perform(final Canvas source, final TwoInputStates inputState, final double tpf) {
-                        addBlock();
-                    }
-                }));
+	private final IntersectionResult intersectionResult = new IntersectionResult();
 
-        logicalLayer.registerTrigger(new InputTrigger(new MouseButtonPressedCondition(MouseButton.RIGHT),
-                new TriggerAction() {
-                    @Override
-                    public void perform(final Canvas source, final TwoInputStates inputStates, final double tpf) {
-                        removeBlock();
-                    }
-                }));
+	private void registerTriggers(final LogicalLayer logicalLayer,
+			final MouseManager mouseManager) {
+		logicalLayer.registerTrigger(new InputTrigger(
+				new MouseButtonPressedCondition(MouseButton.LEFT),
+				new TriggerAction() {
+					@Override
+					public void perform(final Canvas source,
+							final TwoInputStates inputState, final double tpf) {
+						addBlock();
+					}
+				}));
 
-        logicalLayer.registerTrigger(new InputTrigger(new KeyPressedCondition(Key.F), new TriggerAction() {
-            @Override
-            public void perform(final Canvas source, final TwoInputStates inputState, final double tpf) {
-                blockWorld.traceCollision(player.getPosition(), player.getDirection(), 200, BlockType.Solid,
-                        intersectionResult);
-                if (intersectionResult.hit) {
-                    final Pos addPos = intersectionResult.oldPos;
-                    for (int x = 0; x < 3; x++) {
-                        for (int y = 0; y < 3; y++) {
-                            for (int z = 0; z < 3; z++) {
-                                blockWorld.setBlock(addPos.x + x - 1, addPos.y + y - 1, addPos.z + z - 1, 3, true);
-                            }
-                        }
-                    }
-                }
-            }
-        }));
-        logicalLayer.registerTrigger(new InputTrigger(new KeyPressedCondition(Key.G), new TriggerAction() {
-            @Override
-            public void perform(final Canvas source, final TwoInputStates inputState, final double tpf) {
-                blockWorld.traceCollision(player.getPosition(), player.getDirection(), 200, BlockType.Solid,
-                        intersectionResult);
-                if (intersectionResult.hit) {
-                    final Pos addPos = intersectionResult.pos;
-                    for (int x = 0; x < 3; x++) {
-                        for (int y = 0; y < 3; y++) {
-                            for (int z = 0; z < 3; z++) {
-                                blockWorld.setBlock(addPos.x + x - 1, addPos.y + y - 1, addPos.z + z - 1, 0, true);
-                            }
-                        }
-                    }
-                }
-            }
-        }));
+		logicalLayer.registerTrigger(new InputTrigger(
+				new MouseButtonPressedCondition(MouseButton.RIGHT),
+				new TriggerAction() {
+					@Override
+					public void perform(final Canvas source,
+							final TwoInputStates inputStates, final double tpf) {
+						removeBlock();
+					}
+				}));
 
-        if (mouseManager.isSetGrabbedSupported()) {
-            mouseManager.setGrabbed(GrabbedState.GRABBED);
-        }
-    }
+		logicalLayer.registerTrigger(new InputTrigger(new KeyPressedCondition(
+				Key.F), new TriggerAction() {
+			@Override
+			public void perform(final Canvas source,
+					final TwoInputStates inputState, final double tpf) {
+				blockWorld.traceCollision(player.getPosition(),
+						player.getDirection(), 200, BlockType.Solid,
+						intersectionResult);
+				if (intersectionResult.hit) {
+					final Pos addPos = intersectionResult.oldPos;
+					for (int x = 0; x < 3; x++) {
+						for (int y = 0; y < 3; y++) {
+							for (int z = 0; z < 3; z++) {
+								blockWorld.setBlock(addPos.x + x - 1, addPos.y
+										+ y - 1, addPos.z + z - 1, 3, true);
+							}
+						}
+					}
+				}
+			}
+		}));
+		logicalLayer.registerTrigger(new InputTrigger(new KeyPressedCondition(
+				Key.G), new TriggerAction() {
+			@Override
+			public void perform(final Canvas source,
+					final TwoInputStates inputState, final double tpf) {
+				blockWorld.traceCollision(player.getPosition(),
+						player.getDirection(), 200, BlockType.Solid,
+						intersectionResult);
+				if (intersectionResult.hit) {
+					final Pos addPos = intersectionResult.pos;
+					for (int x = 0; x < 3; x++) {
+						for (int y = 0; y < 3; y++) {
+							for (int z = 0; z < 3; z++) {
+								blockWorld.setBlock(addPos.x + x - 1, addPos.y
+										+ y - 1, addPos.z + z - 1, 0, true);
+							}
+						}
+					}
+				}
+			}
+		}));
 
-    @Override
-    public void destroy() {}
+		if (mouseManager.isSetGrabbedSupported()) {
+			mouseManager.setGrabbed(GrabbedState.GRABBED);
+		}
+	}
 
-    @Override
-    public void resize(final int newWidth, final int newHeight) {}
+	@Override
+	public void destroy() {
+	}
 
-    private void addBlock() {
-        blockWorld
-                .traceCollision(player.getPosition(), player.getDirection(), 200, BlockType.Solid, intersectionResult);
-        if (intersectionResult.hit) {
-            final Pos addPos = intersectionResult.oldPos;
-            blockWorld.setBlock(addPos.x, addPos.y, addPos.z, 3, true);
-        }
-    }
+	@Override
+	public void resize(final int newWidth, final int newHeight) {
+	}
 
-    private void removeBlock() {
-        blockWorld
-                .traceCollision(player.getPosition(), player.getDirection(), 200, BlockType.Solid, intersectionResult);
-        if (intersectionResult.hit) {
-            final Pos deletePos = intersectionResult.pos;
-            blockWorld.setBlock(deletePos.x, deletePos.y, deletePos.z, 0, true);
-        }
-    }
+	private void addBlock() {
+		blockWorld.traceCollision(player.getPosition(), player.getDirection(),
+				200, BlockType.Solid, intersectionResult);
+		if (intersectionResult.hit) {
+			final Pos addPos = intersectionResult.oldPos;
+			blockWorld.setBlock(addPos.x, addPos.y, addPos.z, 3, true);
+		}
+	}
+
+	private void removeBlock() {
+		blockWorld.traceCollision(player.getPosition(), player.getDirection(),
+				200, BlockType.Solid, intersectionResult);
+		if (intersectionResult.hit) {
+			final Pos deletePos = intersectionResult.pos;
+			blockWorld.setBlock(deletePos.x, deletePos.y, deletePos.z, 0, true);
+		}
+	}
 
 }

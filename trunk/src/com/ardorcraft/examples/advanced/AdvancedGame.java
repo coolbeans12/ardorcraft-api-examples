@@ -32,6 +32,7 @@ import com.ardor3d.renderer.state.FogState;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.ui.text.BasicText;
 import com.ardor3d.util.ReadOnlyTimer;
+import com.ardor3d.util.resource.ResourceLocatorTool;
 import com.ardorcraft.base.ArdorCraftGame;
 import com.ardorcraft.base.CanvasRelayer;
 import com.ardorcraft.collision.IntersectionResult;
@@ -40,6 +41,7 @@ import com.ardorcraft.generators.NiceDataGenerator;
 import com.ardorcraft.player.PlayerWithPhysics;
 import com.ardorcraft.world.BlockWorld;
 import com.ardorcraft.world.BlockWorld.BlockType;
+import com.ardorcraft.world.WorldSettings;
 
 /**
  * A simple example showing a textured and lit box spinning.
@@ -47,11 +49,9 @@ import com.ardorcraft.world.BlockWorld.BlockType;
 public class AdvancedGame implements ArdorCraftGame {
 
 	private BlockWorld blockWorld;
-	private final int subMeshSize = 16;
+	private final int tileSize = 16;
 	private final int gridSize = 16;
-	private final int width = subMeshSize * gridSize;
-	private final int height = 100;
-	private final double farPlane = (gridSize - 1) / 2 * subMeshSize;
+	private final double farPlane = (gridSize - 1) / 2 * tileSize;
 
 	private final ReadOnlyColorRGBA fogColor = new ColorRGBA(0.9f, 0.9f, 1.0f,
 			1.0f);
@@ -101,8 +101,18 @@ public class AdvancedGame implements ArdorCraftGame {
 		registerTriggers(logicalLayer, mouseManager);
 
 		// Create block world
-		blockWorld = new BlockWorld(width, height, subMeshSize,
-				new NiceDataGenerator(), null);
+		final WorldSettings settings = new WorldSettings();
+		settings.setTerrainTexture(ResourceLocatorTool.locateResource(
+				ResourceLocatorTool.TYPE_TEXTURE, "terrain.png"));
+		settings.setTerrainTextureTileSize(32);
+		settings.setWaterTexture(ResourceLocatorTool.locateResource(
+				ResourceLocatorTool.TYPE_TEXTURE, "water.png"));
+		settings.setTerrainGenerator(new NiceDataGenerator());
+		settings.setTileSize(tileSize);
+		settings.setTileHeight(100);
+		settings.setGridSize(gridSize);
+
+		blockWorld = new BlockWorld(settings);
 
 		root.attachChild(blockWorld.getWorldNode());
 
