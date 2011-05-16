@@ -128,11 +128,12 @@ public class RealGame implements ArdorCraftGame {
 
 		// Map file to use
 		final File worldFileSource = new File("world.acr");
-		// Comment away this if you don't want to rebuild the map from scratch
-		// each run.
-		if (worldFileSource.exists()) {
-			worldFileSource.delete();
-		}
+		// Uncomment this if you want to start your mapfile from scratch, or
+		// pick new
+		// map names...
+		// if (worldFileSource.exists()) {
+		// worldFileSource.delete();
+		// }
 
 		// Create main blockworld handler
 		final WorldSettings settings = new WorldSettings();
