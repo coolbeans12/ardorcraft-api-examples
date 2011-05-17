@@ -97,7 +97,8 @@ public class AdvancedGame implements ArdorCraftGame {
 
         registerTriggers(logicalLayer, mouseManager);
 
-        // Create block world
+        // Create block world. Not setting any map file leads to automatic creation of a world.acr map file (which is
+        // overwritten at each run)
         final WorldSettings settings = new WorldSettings();
         settings.setTerrainTexture(ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE, "terrain.png"));
         settings.setTerrainTextureTileSize(32);
