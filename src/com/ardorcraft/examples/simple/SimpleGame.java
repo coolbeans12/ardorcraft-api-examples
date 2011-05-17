@@ -81,7 +81,8 @@ public class SimpleGame implements ArdorCraftGame {
         player.getPosition().set(0, 50, 0);
         FlyControl.setupTriggers(player, logicalLayer, Vector3.UNIT_Y, true);
 
-        // Create block world
+        // Create block world. Not setting any map file leads to automatic creation of a world.acr map file (which is
+        // overwritten at each run)
         final WorldSettings settings = new WorldSettings();
         settings.setTerrainTexture(ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE, "terrainQ.png"));
         settings.setTerrainTextureTileSize(16);
