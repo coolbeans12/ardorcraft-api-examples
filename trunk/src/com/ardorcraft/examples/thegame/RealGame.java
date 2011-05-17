@@ -38,6 +38,7 @@ import com.ardor3d.renderer.state.FogState;
 import com.ardor3d.renderer.state.WireframeState;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.hint.LightCombineMode;
+import com.ardor3d.scenegraph.shape.Teapot;
 import com.ardor3d.ui.text.BasicText;
 import com.ardor3d.util.GameTaskQueueManager;
 import com.ardor3d.util.ReadOnlyTimer;
@@ -51,6 +52,7 @@ import com.ardorcraft.objects.QuadBox;
 import com.ardorcraft.objects.SkyDome;
 import com.ardorcraft.player.PlayerWithPhysics;
 import com.ardorcraft.util.queue.ArdorCraftTaskQueue;
+import com.ardorcraft.voxel.Voxelator;
 import com.ardorcraft.world.BlockWorld;
 import com.ardorcraft.world.BlockWorld.BlockType;
 import com.ardorcraft.world.WorldSettings;
@@ -88,7 +90,7 @@ public class RealGame implements ArdorCraftGame {
     public void update(final ReadOnlyTimer timer) {
         player.update(blockWorld, timer);
 
-        blockWorld.traceCollision(player.getPosition(), player.getDirection(), 20, BlockType.Solid, intersectionResult);
+        blockWorld.traceCollision(player.getPosition(), player.getDirection(), 50, BlockType.Solid, intersectionResult);
         if (intersectionResult.hit) {
             final Pos hitPos = intersectionResult.pos;
             selectionBox.setTranslation(hitPos.x + 0.5, hitPos.y + 0.5, hitPos.z + 0.5);
@@ -174,9 +176,10 @@ public class RealGame implements ArdorCraftGame {
         root.attachChild(textNode);
         createText("+", canvas.getCanvasRenderer().getCamera().getWidth() / 2 - 5, canvas.getCanvasRenderer()
                 .getCamera().getHeight() / 2 - 10);
-        createText("[F] Fly/Walk", 10, 10);
-        createText("[0..9] Select blocktype", 10, 30);
-        createText("[LMB/RMB] Add/Remove block", 10, 50);
+        createText("[V] Voxelate a mesh at current target pos", 10, 10);
+        createText("[F] Fly/Walk", 10, 30);
+        createText("[0..9] Select blocktype", 10, 50);
+        createText("[LMB/RMB] Add/Remove block", 10, 70);
 
         // Create box to show selected box
         selectionBox = new QuadBox("SelectionBox", new Vector3(), 0.501, 0.501, 0.501);
@@ -290,6 +293,17 @@ public class RealGame implements ArdorCraftGame {
                 globalLight = Math.min(globalLight + 0.05f, 1.0f);
                 blockWorld.setGlobalLight(globalLight);
                 updateLighting();
+            }
+        }));
+
+        logicalLayer.registerTrigger(new InputTrigger(new KeyPressedCondition(Key.V), new TriggerAction() {
+            @Override
+            public void perform(final Canvas source, final TwoInputStates inputState, final double tpf) {
+                if (intersectionResult.hit) {
+                    final Pos addPos = intersectionResult.oldPos;
+                    final Voxelator voxelator = new Voxelator(blockWorld, 50, 50, 50);
+                    voxelator.voxelate(addPos, new Teapot(), 1.0f);
+                }
             }
         }));
 
