@@ -57,7 +57,7 @@ import com.ardorcraft.world.WorldSettings;
 import com.google.common.base.Predicate;
 
 /**
- * A simple example showing a textured and lit box spinning.
+ * A bigger example that will grow over time...
  */
 public class RealGame implements ArdorCraftGame {
 
@@ -141,7 +141,7 @@ public class RealGame implements ArdorCraftGame {
         registerTriggers(logicalLayer, mouseManager);
 
         // Map file to use
-        final File worldFileSource = new File("world.acr");
+        final File worldFileSource = new File("worldReal.acr");
         // Uncomment this if you want to start your mapfile from scratch each run...
         // if (worldFileSource.exists()) {
         // worldFileSource.delete();
