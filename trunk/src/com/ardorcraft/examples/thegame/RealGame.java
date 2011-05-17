@@ -302,7 +302,7 @@ public class RealGame implements ArdorCraftGame {
                 if (intersectionResult.hit) {
                     final Pos addPos = intersectionResult.oldPos;
                     final Voxelator voxelator = new Voxelator(blockWorld, 50, 50, 50);
-                    voxelator.voxelate(addPos, new Teapot(), 1.0f);
+                    voxelator.voxelate(addPos, new Teapot(), 1.0f, 6);
                 }
             }
         }));
