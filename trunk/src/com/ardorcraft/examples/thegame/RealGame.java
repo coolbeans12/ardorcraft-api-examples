@@ -54,6 +54,7 @@ import com.ardorcraft.util.queue.ArdorCraftTaskQueue;
 import com.ardorcraft.world.BlockWorld;
 import com.ardorcraft.world.BlockWorld.BlockType;
 import com.ardorcraft.world.WorldSettings;
+import com.google.common.base.Predicate;
 
 /**
  * A simple example showing a textured and lit box spinning.
@@ -80,6 +81,7 @@ public class RealGame implements ArdorCraftGame {
     private SkyDome skyDome;
     private QuadBox selectionBox;
 
+    private int blockType = 8;
     private float globalLight = 1.0f;
 
     @Override
@@ -173,7 +175,8 @@ public class RealGame implements ArdorCraftGame {
         createText("+", canvas.getCanvasRenderer().getCamera().getWidth() / 2 - 5, canvas.getCanvasRenderer()
                 .getCamera().getHeight() / 2 - 10);
         createText("[F] Fly/Walk", 10, 10);
-        createText("[LMB/RMB] Add/Remove block", 10, 30);
+        createText("[0..9] Select blocktype", 10, 30);
+        createText("[LMB/RMB] Add/Remove block", 10, 50);
 
         // Create box to show selected box
         selectionBox = new QuadBox("SelectionBox", new Vector3(), 0.501, 0.501, 0.501);
@@ -258,7 +261,22 @@ public class RealGame implements ArdorCraftGame {
             }
         }));
 
-        logicalLayer.registerTrigger(new InputTrigger(new KeyPressedCondition(Key.ONE), new TriggerAction() {
+        final Predicate<TwoInputStates> numberPressed = new Predicate<TwoInputStates>() {
+            public boolean apply(final TwoInputStates states) {
+                final char keyChar = states.getCurrent().getKeyboardState().getKeyEvent().getKeyChar();
+                if (Character.isDigit(keyChar)) {
+                    blockType = Character.digit(keyChar, 10) + 2;
+                    return true;
+                }
+                return false;
+            }
+        };
+        logicalLayer.registerTrigger(new InputTrigger(numberPressed, new TriggerAction() {
+            @Override
+            public void perform(final Canvas source, final TwoInputStates inputState, final double tpf) {}
+        }));
+
+        logicalLayer.registerTrigger(new InputTrigger(new KeyPressedCondition(Key.Y), new TriggerAction() {
             @Override
             public void perform(final Canvas source, final TwoInputStates inputState, final double tpf) {
                 globalLight = Math.max(globalLight - 0.05f, 0.1f);
@@ -266,7 +284,7 @@ public class RealGame implements ArdorCraftGame {
                 updateLighting();
             }
         }));
-        logicalLayer.registerTrigger(new InputTrigger(new KeyPressedCondition(Key.TWO), new TriggerAction() {
+        logicalLayer.registerTrigger(new InputTrigger(new KeyPressedCondition(Key.H), new TriggerAction() {
             @Override
             public void perform(final Canvas source, final TwoInputStates inputState, final double tpf) {
                 globalLight = Math.min(globalLight + 0.05f, 1.0f);
@@ -291,7 +309,7 @@ public class RealGame implements ArdorCraftGame {
     private void addBlock() {
         if (intersectionResult.hit) {
             final Pos addPos = intersectionResult.oldPos;
-            blockWorld.setBlock(addPos.x, addPos.y, addPos.z, 8, true);
+            blockWorld.setBlock(addPos.x, addPos.y, addPos.z, blockType, true);
         }
     }
 
