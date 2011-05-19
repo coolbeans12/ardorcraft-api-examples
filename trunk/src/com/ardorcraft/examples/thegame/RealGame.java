@@ -83,7 +83,7 @@ public class RealGame implements ArdorCraftGame {
     private SkyDome skyDome;
     private QuadBox selectionBox;
 
-    private int blockType = 8;
+    private int blockType = 1;
     private float globalLight = 1.0f;
 
     @Override
@@ -137,7 +137,7 @@ public class RealGame implements ArdorCraftGame {
 
         // Create player object
         player = new PlayerWithPhysics(logicalLayer);
-        player.getPosition().set(15, 40, 15);
+        player.getPosition().set(15, 50, 15);
         player.setWalking(true);
 
         registerTriggers(logicalLayer, mouseManager);
@@ -161,7 +161,7 @@ public class RealGame implements ArdorCraftGame {
         settings.setTerrainGenerator(new NiceDataGenerator());
         settings.setMapFile(worldFileSource);
         settings.setTileSize(tileSize);
-        settings.setTileHeight(100);
+        settings.setTileHeight(128);
         settings.setGridSize(gridSize);
 
         blockWorld = new BlockWorld(settings);
@@ -265,10 +265,11 @@ public class RealGame implements ArdorCraftGame {
         }));
 
         final Predicate<TwoInputStates> numberPressed = new Predicate<TwoInputStates>() {
+            @Override
             public boolean apply(final TwoInputStates states) {
                 final char keyChar = states.getCurrent().getKeyboardState().getKeyEvent().getKeyChar();
                 if (Character.isDigit(keyChar)) {
-                    blockType = Character.digit(keyChar, 10) + 2;
+                    blockType = Character.digit(keyChar, 10);
                     return true;
                 }
                 return false;
@@ -302,8 +303,15 @@ public class RealGame implements ArdorCraftGame {
                 if (intersectionResult.hit) {
                     final Pos addPos = intersectionResult.oldPos;
                     final Voxelator voxelator = new Voxelator(blockWorld, 50, 50, 50);
-                    voxelator.voxelate(addPos, new Teapot(), 1.0f, 6);
+                    voxelator.voxelate(addPos, new Teapot(), 1.0f, 43);
                 }
+            }
+        }));
+
+        logicalLayer.registerTrigger(new InputTrigger(new KeyPressedCondition(Key.G), new TriggerAction() {
+            @Override
+            public void perform(final Canvas source, final TwoInputStates inputState, final double tpf) {
+                player.getPosition().set(0, 100, 0);
             }
         }));
 

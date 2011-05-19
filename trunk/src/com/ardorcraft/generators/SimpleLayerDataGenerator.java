@@ -23,13 +23,13 @@ public class SimpleLayerDataGenerator extends LayerDataGenerator {
     @Override
     public int getLayerType(final int layer, final int x, final int z) {
         if (layer == 0) {
-            return 2;
+            return 1;
         } else if (layer == 1) {
             return 3;
         } else if (layer == 2) {
-            return 4;
+            return 2;
         }
-        return 3;
+        return 2;
     }
 
     @Override
