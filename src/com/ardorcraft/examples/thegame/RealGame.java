@@ -66,12 +66,14 @@ public class RealGame implements ArdorCraftGame {
     private BlockWorld blockWorld;
     private final int tileSize = 16;
     private final int gridSize = 16;
+    private final int height = 128;
     private final double farPlane = (gridSize - 1) / 2 * tileSize;
 
     private final IntersectionResult intersectionResult = new IntersectionResult();
 
     private final FogState fogState = new FogState();
-    private final ReadOnlyColorRGBA fogColor = new ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+    private final ColorRGBA fogColor = new ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+    private final ColorRGBA topColor = new ColorRGBA(0.5f, 0.6f, 1.0f, 1.0f);
 
     private CanvasRelayer canvas;
     private Node root;
@@ -85,12 +87,14 @@ public class RealGame implements ArdorCraftGame {
 
     private int blockType = 1;
     private float globalLight = 1.0f;
+    private boolean isInWater = false;
+    private final int[] blockTypeLookup = new int[] { 1, 3, 2, 4, 5, 20, 45, 12, 52, 48 };
 
     @Override
     public void update(final ReadOnlyTimer timer) {
         player.update(blockWorld, timer);
 
-        blockWorld.traceCollision(player.getPosition(), player.getDirection(), 50, BlockType.Solid, intersectionResult);
+        blockWorld.traceCollision(player.getPosition(), player.getDirection(), 50, intersectionResult);
         if (intersectionResult.hit) {
             final Pos hitPos = intersectionResult.pos;
             selectionBox.setTranslation(hitPos.x + 0.5, hitPos.y + 0.5, hitPos.z + 0.5);
@@ -102,6 +106,8 @@ public class RealGame implements ArdorCraftGame {
         camera.setLeft(player.getLeft());
 
         skyDome.setTranslation(player.getPosition());
+
+        updateFog(player.getPosition());
 
         // The infinite world update
         blockWorld.updatePosition(player.getPosition());
@@ -161,7 +167,7 @@ public class RealGame implements ArdorCraftGame {
         settings.setTerrainGenerator(new NiceDataGenerator());
         settings.setMapFile(worldFileSource);
         settings.setTileSize(tileSize);
-        settings.setTileHeight(128);
+        settings.setTileHeight(height);
         settings.setGridSize(gridSize);
 
         blockWorld = new BlockWorld(settings);
@@ -210,7 +216,7 @@ public class RealGame implements ArdorCraftGame {
         final ReadOnlyColorRGBA newColor = new ColorRGBA(fogColor).multiplyLocal(globalLight);
         fogState.setColor(newColor);
         skyDome.getMidColor().set(newColor);
-        skyDome.getTopColor().set(0.5f, 0.6f, 1.0f, 1.0f).multiplyLocal(globalLight);
+        skyDome.getTopColor().set(topColor).multiplyLocal(globalLight);
         skyDome.updateColors();
 
         GameTaskQueueManager.getManager(ContextManager.getCurrentContext()).getQueue(ArdorCraftTaskQueue.RENDER)
@@ -231,6 +237,26 @@ public class RealGame implements ArdorCraftGame {
         fogState.setDensityFunction(FogState.DensityFunction.Linear);
         fogState.setQuality(FogState.Quality.PerPixel);
         root.setRenderState(fogState);
+    }
+
+    private void updateFog(final Vector3 position) {
+        final int block = blockWorld.getBlock((int) position.getX(), (int) (position.getY() + 0.15),
+                (int) position.getZ(), BlockType.All);
+        if (block == BlockWorld.WATER && !isInWater) {
+            isInWater = true;
+            fogColor.set(0.2f, 0.3f, 0.5f, 1.0f);
+            topColor.set(0.1f, 0.2f, 0.3f, 1.0f);
+            fogState.setStart(0);
+            fogState.setEnd((float) farPlane / 8);
+            updateLighting();
+        } else if (block == 0 && isInWater) {
+            isInWater = false;
+            fogColor.set(1.0f, 1.0f, 1.0f, 1.0f);
+            topColor.set(0.5f, 0.6f, 1.0f, 1.0f);
+            fogState.setEnd((float) farPlane);
+            fogState.setStart((float) farPlane / 3.0f);
+            updateLighting();
+        }
     }
 
     private void registerTriggers(final LogicalLayer logicalLayer, final MouseManager mouseManager) {
@@ -269,7 +295,7 @@ public class RealGame implements ArdorCraftGame {
             public boolean apply(final TwoInputStates states) {
                 final char keyChar = states.getCurrent().getKeyboardState().getKeyEvent().getKeyChar();
                 if (Character.isDigit(keyChar)) {
-                    blockType = Character.digit(keyChar, 10);
+                    blockType = blockTypeLookup[Character.digit(keyChar, 10)];
                     return true;
                 }
                 return false;
@@ -283,7 +309,7 @@ public class RealGame implements ArdorCraftGame {
         logicalLayer.registerTrigger(new InputTrigger(new KeyPressedCondition(Key.Y), new TriggerAction() {
             @Override
             public void perform(final Canvas source, final TwoInputStates inputState, final double tpf) {
-                globalLight = Math.max(globalLight - 0.05f, 0.1f);
+                globalLight = Math.min(globalLight + 0.05f, 1.0f);
                 blockWorld.setGlobalLight(globalLight);
                 updateLighting();
             }
@@ -291,7 +317,7 @@ public class RealGame implements ArdorCraftGame {
         logicalLayer.registerTrigger(new InputTrigger(new KeyPressedCondition(Key.H), new TriggerAction() {
             @Override
             public void perform(final Canvas source, final TwoInputStates inputState, final double tpf) {
-                globalLight = Math.min(globalLight + 0.05f, 1.0f);
+                globalLight = Math.max(globalLight - 0.05f, 0.1f);
                 blockWorld.setGlobalLight(globalLight);
                 updateLighting();
             }
@@ -311,7 +337,7 @@ public class RealGame implements ArdorCraftGame {
         logicalLayer.registerTrigger(new InputTrigger(new KeyPressedCondition(Key.G), new TriggerAction() {
             @Override
             public void perform(final Canvas source, final TwoInputStates inputState, final double tpf) {
-                player.getPosition().set(0, 100, 0);
+                player.getPosition().set(0, height, 0);
             }
         }));
 

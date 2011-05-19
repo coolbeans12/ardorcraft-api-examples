@@ -28,6 +28,7 @@ import com.ardorcraft.control.FlyControl;
 import com.ardorcraft.generators.LayerDataGenerator;
 import com.ardorcraft.player.PlayerBase;
 import com.ardorcraft.world.BlockWorld;
+import com.ardorcraft.world.WorldModifier;
 import com.ardorcraft.world.WorldSettings;
 
 /**
@@ -118,17 +119,17 @@ public class SimpleGame implements ArdorCraftGame {
 
     LayerDataGenerator simpleSineGenerator = new LayerDataGenerator(1, 0) {
         @Override
-        public boolean isCave(final int x, final int y, final int z) {
+        public boolean isCave(final int x, final int y, final int z, final WorldModifier blockScene) {
             return false;
         }
 
         @Override
-        public int getLayerType(final int layer, final int x, final int z) {
+        public int getLayerType(final int layer, final int x, final int z, final WorldModifier blockScene) {
             return 4;
         }
 
         @Override
-        public int getLayerHeight(final int layer, final int x, final int z) {
+        public int getLayerHeight(final int layer, final int x, final int y, final int z, final WorldModifier blockScene) {
             return (int) (Math.abs(Math.sin(x * 0.1) * Math.cos(z * 0.1)) * height / 2);
         }
     };

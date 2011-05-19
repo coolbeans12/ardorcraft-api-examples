@@ -41,7 +41,6 @@ import com.ardorcraft.data.Pos;
 import com.ardorcraft.generators.CachedNoiseDataGenerator;
 import com.ardorcraft.player.PlayerWithCollision;
 import com.ardorcraft.world.BlockWorld;
-import com.ardorcraft.world.BlockWorld.BlockType;
 import com.ardorcraft.world.WorldSettings;
 
 /**
@@ -94,7 +93,7 @@ public class IntermediateGame implements ArdorCraftGame {
 
         // Create player object
         player = new PlayerWithCollision();
-        player.getPosition().set(0, 30, 0);
+        player.getPosition().set(0, 100, 0);
         FlyControl.setupTriggers(player, logicalLayer, Vector3.UNIT_Y, false);
 
         registerTriggers(logicalLayer, mouseManager);
@@ -157,8 +156,7 @@ public class IntermediateGame implements ArdorCraftGame {
         logicalLayer.registerTrigger(new InputTrigger(new KeyPressedCondition(Key.F), new TriggerAction() {
             @Override
             public void perform(final Canvas source, final TwoInputStates inputState, final double tpf) {
-                blockWorld.traceCollision(player.getPosition(), player.getDirection(), 200, BlockType.Solid,
-                        intersectionResult);
+                blockWorld.traceCollision(player.getPosition(), player.getDirection(), 200, intersectionResult);
                 if (intersectionResult.hit) {
                     final Pos addPos = intersectionResult.oldPos;
                     for (int x = 0; x < 3; x++) {
@@ -174,8 +172,7 @@ public class IntermediateGame implements ArdorCraftGame {
         logicalLayer.registerTrigger(new InputTrigger(new KeyPressedCondition(Key.G), new TriggerAction() {
             @Override
             public void perform(final Canvas source, final TwoInputStates inputState, final double tpf) {
-                blockWorld.traceCollision(player.getPosition(), player.getDirection(), 200, BlockType.Solid,
-                        intersectionResult);
+                blockWorld.traceCollision(player.getPosition(), player.getDirection(), 200, intersectionResult);
                 if (intersectionResult.hit) {
                     final Pos addPos = intersectionResult.pos;
                     for (int x = 0; x < 3; x++) {
@@ -202,7 +199,7 @@ public class IntermediateGame implements ArdorCraftGame {
 
     private void addBlock() {
         blockWorld
-                .traceCollision(player.getPosition(), player.getDirection(), 200, BlockType.Solid, intersectionResult);
+                .traceCollision(player.getPosition(), player.getDirection(), 200, intersectionResult);
         if (intersectionResult.hit) {
             final Pos addPos = intersectionResult.oldPos;
             blockWorld.setBlock(addPos.x, addPos.y, addPos.z, 3, true);
@@ -211,7 +208,7 @@ public class IntermediateGame implements ArdorCraftGame {
 
     private void removeBlock() {
         blockWorld
-                .traceCollision(player.getPosition(), player.getDirection(), 200, BlockType.Solid, intersectionResult);
+                .traceCollision(player.getPosition(), player.getDirection(), 200, intersectionResult);
         if (intersectionResult.hit) {
             final Pos deletePos = intersectionResult.pos;
             blockWorld.setBlock(deletePos.x, deletePos.y, deletePos.z, 0, true);

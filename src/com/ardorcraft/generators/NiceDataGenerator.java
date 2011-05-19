@@ -1,26 +1,73 @@
 
 package com.ardorcraft.generators;
 
+import java.util.List;
+import java.util.Random;
+
 import com.ardor3d.math.MathUtils;
+import com.ardorcraft.data.Pos;
 import com.ardorcraft.util.ImprovedNoise;
 import com.ardorcraft.world.BlockWorld;
 import com.ardorcraft.world.BlockWorld.BlockType;
 import com.ardorcraft.world.WorldModifier;
+import com.google.common.collect.Lists;
 
 public class NiceDataGenerator implements DataGenerator {
     private final int waterHeight = 15;
+    private final List<Pos> treePositions = Lists.newArrayList();
+    private final Random rand = new Random();
 
     @Override
     public void generateChunk(final int xStart, final int zStart, final int xEnd, final int zEnd, final int height,
             final WorldModifier blockScene) {
+        rand.setSeed(xStart * 10000 + zStart);
+        treePositions.clear();
+
         for (int x = xStart; x < xEnd; x++) {
             for (int z = zStart; z < zEnd; z++) {
-                generateColumn(x, z, height, blockScene);
+                generateColumn(x, z, height, blockScene, xStart, zStart, xEnd, zEnd);
+            }
+        }
+
+        for (final Pos pos : treePositions) {
+            if (blockScene.getBlock(pos.x - 1, pos.y + 2, pos.z, BlockType.All) == 0
+                    && blockScene.getBlock(pos.x + 2, pos.y + 2, pos.z, BlockType.All) == 0
+                    && blockScene.getBlock(pos.x, pos.y + 2, pos.z - 1, BlockType.All) == 0
+                    && blockScene.getBlock(pos.x, pos.y + 2, pos.z + 1, BlockType.All) == 0) {
+                addTree(blockScene, pos);
             }
         }
     }
 
-    private void generateColumn(final int x, final int z, final int height, final WorldModifier blockScene) {
+    private void addTree(final WorldModifier blockScene, final Pos pos) {
+        final int treeHeight = rand.nextInt(4) + 2;
+        for (int y = 0; y < treeHeight; y++) {
+            blockScene.setBlock(pos.x, pos.y + y, pos.z, 17);
+        }
+
+        final int maxWidth = 3;
+        final int leavesHeight = treeHeight / 2 + 2;
+        for (int x = 0; x < maxWidth; x++) {
+            for (int z = 0; z < maxWidth; z++) {
+                for (int y = 0; y < leavesHeight; y++) {
+                    final int xx = x - maxWidth / 2;
+                    final int yy = y - leavesHeight / 2;
+                    final int zz = z - maxWidth / 2;
+                    if (xx == 0 && zz == 0) {
+                        continue;
+                    }
+                    final double test = (Math.abs(xx) + Math.abs(yy) + Math.abs(zz)) * 2.0
+                            / (maxWidth * 2.5 + leavesHeight);
+                    if (rand.nextDouble() > test) {
+                        blockScene.setBlock(pos.x + xx, pos.y + yy + treeHeight, pos.z + zz, 18);
+                    }
+                }
+            }
+        }
+    }
+
+    private void generateColumn(final int x, final int z, final int height, final WorldModifier blockScene,
+            final int xStart, final int zStart, final int xEnd, final int zEnd) {
         final double gen = 5;
 
         int localHeight = 0;
@@ -62,6 +109,7 @@ public class NiceDataGenerator implements DataGenerator {
                 blockScene.setBlock(x, localHeight - 1, z, 12);
             } else {
                 blockScene.setBlock(x, localHeight - 1, z, 2);
+                checkAddTree(x, z, xStart, zStart, xEnd, zEnd, localHeight);
             }
 
             if (noise2 < -0.4) {
@@ -84,6 +132,17 @@ public class NiceDataGenerator implements DataGenerator {
 
         for (int y = localHeight; y < height; y++) {
             blockScene.setBlock(x, y, z, 0);
+        }
+    }
+
+    private void checkAddTree(final int x, final int z, final int xStart, final int zStart, final int xEnd,
+            final int zEnd, final int localHeight) {
+        if (x > xStart && x < xEnd - 1 && z > zStart && z < zEnd - 1 && x % 3 == 0 && (z + 1) % 3 == 0) {
+            final double noiseTree = ImprovedNoise.noise(x * 0.01, 0, z * 0.01) + 0.0;
+            final double r = rand.nextDouble();
+            if (noiseTree > r) {
+                treePositions.add(new Pos(x, localHeight, z));
+            }
         }
     }
 

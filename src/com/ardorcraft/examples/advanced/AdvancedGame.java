@@ -40,7 +40,6 @@ import com.ardorcraft.data.Pos;
 import com.ardorcraft.generators.NiceDataGenerator;
 import com.ardorcraft.player.PlayerWithPhysics;
 import com.ardorcraft.world.BlockWorld;
-import com.ardorcraft.world.BlockWorld.BlockType;
 import com.ardorcraft.world.WorldSettings;
 
 /**
@@ -93,7 +92,7 @@ public class AdvancedGame implements ArdorCraftGame {
         // Create player object
         player = new PlayerWithPhysics(logicalLayer);
         player.setWalking(true);
-        player.getPosition().set(15, 40, 15);
+        player.getPosition().set(15, 50, 15);
 
         registerTriggers(logicalLayer, mouseManager);
 
@@ -172,7 +171,7 @@ public class AdvancedGame implements ArdorCraftGame {
 
     private void addBlock() {
         blockWorld
-                .traceCollision(player.getPosition(), player.getDirection(), 200, BlockType.Solid, intersectionResult);
+                .traceCollision(player.getPosition(), player.getDirection(), 200, intersectionResult);
         if (intersectionResult.hit) {
             final Pos addPos = intersectionResult.oldPos;
             blockWorld.setBlock(addPos.x, addPos.y, addPos.z, 3, true);
@@ -181,7 +180,7 @@ public class AdvancedGame implements ArdorCraftGame {
 
     private void removeBlock() {
         blockWorld
-                .traceCollision(player.getPosition(), player.getDirection(), 200, BlockType.Solid, intersectionResult);
+                .traceCollision(player.getPosition(), player.getDirection(), 200, intersectionResult);
         if (intersectionResult.hit) {
             final Pos deletePos = intersectionResult.pos;
             blockWorld.setBlock(deletePos.x, deletePos.y, deletePos.z, 0, true);
