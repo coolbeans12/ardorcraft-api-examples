@@ -2,6 +2,7 @@
 package com.ardorcraft.generators;
 
 import com.ardorcraft.util.ImprovedNoise;
+import com.ardorcraft.world.WorldModifier;
 
 public class SimpleLayerDataGenerator extends LayerDataGenerator {
     public SimpleLayerDataGenerator(final int waterHeight) {
@@ -9,7 +10,7 @@ public class SimpleLayerDataGenerator extends LayerDataGenerator {
     }
 
     @Override
-    public int getLayerHeight(final int layer, final int x, final int z) {
+    public int getLayerHeight(final int layer, final int x, final int y, final int z, final WorldModifier blockScene) {
         if (layer == 0) {
             return 5;
         } else if (layer == 1) {
@@ -21,7 +22,7 @@ public class SimpleLayerDataGenerator extends LayerDataGenerator {
     }
 
     @Override
-    public int getLayerType(final int layer, final int x, final int z) {
+    public int getLayerType(final int layer, final int x, final int z, final WorldModifier blockScene) {
         if (layer == 0) {
             return 1;
         } else if (layer == 1) {
@@ -33,7 +34,7 @@ public class SimpleLayerDataGenerator extends LayerDataGenerator {
     }
 
     @Override
-    public boolean isCave(final int x, final int y, final int z) {
+    public boolean isCave(final int x, final int y, final int z, final WorldModifier blockScene) {
         if (y > 1) {
             final int testHeight = (int) (ImprovedNoise.noise(x * 0.05, 0.0, z * 0.05) * 5 + waterHeight);
             if (y > testHeight) {

@@ -13,6 +13,7 @@ public abstract class LayerDataGenerator implements DataGenerator {
         this.waterHeight = waterHeight;
     }
 
+    @Override
     public void generateChunk(final int xStart, final int zStart, final int xEnd, final int zEnd, final int height,
             final WorldModifier blockScene) {
         for (int x = xStart; x < xEnd; x++) {
@@ -26,11 +27,11 @@ public abstract class LayerDataGenerator implements DataGenerator {
         int startHeight = 1;
         blockScene.setBlock(x, 0, z, 4);
         for (int i = 0; i < nrLayers; i++) {
-            final int localHeight = Math.max(0, getLayerHeight(i, x, z));
-            final int type = getLayerType(i, x, z);
+            final int localHeight = Math.max(0, getLayerHeight(i, x, startHeight, z, blockScene));
+            final int type = getLayerType(i, x, z, blockScene);
 
             for (int y = startHeight; y < startHeight + localHeight && y < height; y++) {
-                if (!isCave(x, y, z)) {
+                if (!isCave(x, y, z, blockScene)) {
                     blockScene.setBlock(x, y, z, type);
                 } else if (y < waterHeight) {
                     blockScene.setBlock(x, y, z, BlockWorld.WATER);
@@ -49,9 +50,9 @@ public abstract class LayerDataGenerator implements DataGenerator {
         }
     }
 
-    public abstract boolean isCave(int x, int y, int z);
+    public abstract boolean isCave(int x, int y, int z, WorldModifier blockScene);
 
-    public abstract int getLayerType(int layer, int x, int z);
+    public abstract int getLayerType(int layer, int x, int z, WorldModifier blockScene);
 
-    public abstract int getLayerHeight(int layer, int x, int z);
+    public abstract int getLayerHeight(int layer, int x, int y, int z, WorldModifier blockScene);
 }

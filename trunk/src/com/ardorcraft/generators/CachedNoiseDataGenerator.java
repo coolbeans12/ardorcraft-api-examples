@@ -2,6 +2,7 @@
 package com.ardorcraft.generators;
 
 import com.ardorcraft.util.ImprovedNoise;
+import com.ardorcraft.world.BlockWorld.BlockType;
 import com.ardorcraft.world.WorldModifier;
 
 public class CachedNoiseDataGenerator extends LayerDataGenerator {
@@ -16,7 +17,7 @@ public class CachedNoiseDataGenerator extends LayerDataGenerator {
     private final double[][][] noiseCache4;
 
     public CachedNoiseDataGenerator(final int waterHeight, final int width, final int height) {
-        super(3, waterHeight);
+        super(4, waterHeight);
 
         wSize = width / scale + 1;
         hSize = height / scale + 1;
@@ -80,38 +81,46 @@ public class CachedNoiseDataGenerator extends LayerDataGenerator {
     }
 
     @Override
-    public int getLayerHeight(final int layer, final int x, final int z) {
+    public int getLayerHeight(final int layer, final int x, final int y, final int z, final WorldModifier blockScene) {
         if (layer == 0) {
-            return 5;
+            return (int) Math.abs((interpolatedNoise(noiseCache1, x, 0, z) + 1.0) * 15
+                    + (interpolatedNoise(noiseCache2, x, 0, z) + 0.5) * 5);
         } else if (layer == 1) {
-            return (int) Math.abs((interpolatedNoise(noiseCache1, x, 0, z) + 0.5) * 30
-                    + (interpolatedNoise(noiseCache3, x, 0, z) + 0.5) * 20);
-        } else if (layer == 2) {
-            final double t = interpolatedNoise(noiseCache1, x, 0, z);
+            final double t = interpolatedNoise(noiseCache3, x, 0, z);
             if (t > -0.2) {
                 final double t2 = interpolatedNoise(noiseCache4, x, 0, z);
                 if (t2 + 0.5 > 0) {
                     return (int) (Math.abs(t2 + 0.5) * 30 * (t + 0.2));
                 }
             }
+        } else if (layer == 2) {
+            return (int) Math.abs((interpolatedNoise(noiseCache1, x, 0, z) + 0.5) * 30
+                    + (interpolatedNoise(noiseCache3, x, 0, z) + 0.5) * 20);
+        } else if (layer == 3) {
+            final int block = blockScene.getBlock(x, y - 1, z, BlockType.All);
+            if (block == 3) {
+                return 1;
+            }
         }
         return 0;
     }
 
     @Override
-    public int getLayerType(final int layer, final int x, final int z) {
+    public int getLayerType(final int layer, final int x, final int z, final WorldModifier blockScene) {
         if (layer == 0) {
             return 12;
         } else if (layer == 1) {
-            return 3;
+            return 1;
         } else if (layer == 2) {
+            return 3;
+        } else if (layer == 3) {
             return 2;
         }
         return 3;
     }
 
     @Override
-    public boolean isCave(final int x, final int y, final int z) {
+    public boolean isCave(final int x, final int y, final int z, final WorldModifier blockScene) {
         if (y > 1) {
             final int testHeight = (int) (interpolatedNoise(noiseCache1, x, y, z) * 5 + waterHeight);
             if (y > testHeight) {
