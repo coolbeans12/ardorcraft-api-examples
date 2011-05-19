@@ -2,11 +2,13 @@
 package com.ardorcraft.player;
 
 import com.ardor3d.input.logical.LogicalLayer;
+import com.ardor3d.math.MathUtils;
 import com.ardor3d.math.Vector3;
 import com.ardor3d.util.ReadOnlyTimer;
 import com.ardorcraft.control.FlyControl;
 import com.ardorcraft.control.WalkControl;
 import com.ardorcraft.world.BlockWorld;
+import com.ardorcraft.world.BlockWorld.BlockType;
 
 /**
  * A player implementation with walk/fly modes and gravity and jumping.
@@ -37,6 +39,8 @@ public class PlayerWithPhysics extends PlayerWithCollision {
 
         time += tpf;
 
+        keepAboveGround(blockScene);
+
         int ticks = 0;
         while (time > stepTime) {
             final double step = stepTime;
@@ -63,6 +67,23 @@ public class PlayerWithPhysics extends PlayerWithCollision {
             getAcceleration().set(0, 0, 0);
         }
         jump = false;
+    }
+
+    private void keepAboveGround(final BlockWorld blockScene) {
+        final int X = (int) MathUtils.floor(position.getX());
+        final int Y = (int) MathUtils.floor(position.getY());
+        final int Z = (int) MathUtils.floor(position.getZ());
+
+        int block = blockScene.getBlock(X, Y, Z, BlockType.All);
+        if (block != 0 && block != BlockWorld.WATER) {
+            for (int y = Y; y < blockScene.getHeight(); y++) {
+                block = blockScene.getBlock(X, y, Z, BlockType.All);
+                if (block == 0 || block == BlockWorld.WATER) {
+                    position.setY(y + 2);
+                    break;
+                }
+            }
+        }
     }
 
     double t = 0;
