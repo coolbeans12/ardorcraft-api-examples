@@ -103,7 +103,7 @@ public class NiceDataGenerator implements DataGenerator {
         localHeight += val;
 
         // sediment
-        final int block = blockScene.getBlock(x, localHeight - 1, z, BlockType.Solid);
+        final int block = blockScene.getBlock(x, localHeight - 1, z, BlockType.All);
         if (block == 3) {
             if (localHeight - 1 <= waterHeight + 1) {
                 blockScene.setBlock(x, localHeight - 1, z, 12);
