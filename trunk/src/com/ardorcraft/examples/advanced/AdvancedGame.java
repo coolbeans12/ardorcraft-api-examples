@@ -170,17 +170,17 @@ public class AdvancedGame implements ArdorCraftGame {
     public void resize(final int newWidth, final int newHeight) {}
 
     private void addBlock() {
-        blockWorld
-                .traceCollision(player.getPosition(), player.getDirection(), 200, intersectionResult);
+        blockWorld.traceCollision(player.getPosition(), player.getDirection(), 200, intersectionResult);
         if (intersectionResult.hit) {
             final Pos addPos = intersectionResult.oldPos;
-            blockWorld.setBlock(addPos.x, addPos.y, addPos.z, 3, true);
+            if (!player.isPlayerSpace(addPos)) {
+                blockWorld.setBlock(addPos.x, addPos.y, addPos.z, 1, true);
+            }
         }
     }
 
     private void removeBlock() {
-        blockWorld
-                .traceCollision(player.getPosition(), player.getDirection(), 200, intersectionResult);
+        blockWorld.traceCollision(player.getPosition(), player.getDirection(), 200, intersectionResult);
         if (intersectionResult.hit) {
             final Pos deletePos = intersectionResult.pos;
             blockWorld.setBlock(deletePos.x, deletePos.y, deletePos.z, 0, true);
