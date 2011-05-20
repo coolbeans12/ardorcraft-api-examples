@@ -88,7 +88,9 @@ public class RealGame implements ArdorCraftGame {
     private int blockType = 1;
     private float globalLight = 1.0f;
     private boolean isInWater = false;
-    private final int[] blockTypeLookup = new int[] { 1, 3, 2, 4, 5, 20, 45, 12, 52, 48 };
+    private final int[] blockTypeLookup = new int[] {
+            1, 3, 2, 4, 5, 20, 45, 12, 52, 48
+    };
 
     @Override
     public void update(final ReadOnlyTimer timer) {
@@ -357,7 +359,9 @@ public class RealGame implements ArdorCraftGame {
     private void addBlock() {
         if (intersectionResult.hit) {
             final Pos addPos = intersectionResult.oldPos;
-            blockWorld.setBlock(addPos.x, addPos.y, addPos.z, blockType, true);
+            if (!player.isPlayerSpace(addPos)) {
+                blockWorld.setBlock(addPos.x, addPos.y, addPos.z, blockType, true);
+            }
         }
     }
 
