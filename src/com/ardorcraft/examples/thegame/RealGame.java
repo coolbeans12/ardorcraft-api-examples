@@ -38,6 +38,7 @@ import com.ardor3d.renderer.state.FogState;
 import com.ardor3d.renderer.state.WireframeState;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.hint.LightCombineMode;
+import com.ardor3d.scenegraph.hint.NormalsMode;
 import com.ardor3d.scenegraph.shape.Teapot;
 import com.ardor3d.ui.text.BasicText;
 import com.ardor3d.util.GameTaskQueueManager;
@@ -86,10 +87,10 @@ public class RealGame implements ArdorCraftGame {
     private QuadBox selectionBox;
 
     private int blockType = 1;
-    private float globalLight = 1.0f;
+    private int globalLight = 15;
     private boolean isInWater = false;
     private final int[] blockTypeLookup = new int[] {
-            1, 3, 2, 4, 5, 20, 45, 12, 52, 48
+            1, 2, 4, 5, 20, 45, 12, 52, 48, 50
     };
 
     @Override
@@ -184,13 +185,15 @@ public class RealGame implements ArdorCraftGame {
         root.attachChild(textNode);
         createText("+", canvas.getCanvasRenderer().getCamera().getWidth() / 2 - 5, canvas.getCanvasRenderer()
                 .getCamera().getHeight() / 2 - 10);
-        createText("[V] Voxelate a mesh at current target pos", 10, 10);
-        createText("[F] Fly/Walk", 10, 30);
-        createText("[0..9] Select blocktype", 10, 50);
-        createText("[LMB/RMB] Add/Remove block", 10, 70);
+        createText("[Y/H] Change time of day", 10, 10);
+        createText("[V] Voxelate a mesh at current target pos", 10, 30);
+        createText("[F] Fly/Walk", 10, 50);
+        createText("[0..9] Select blocktype (9=torch)", 10, 70);
+        createText("[LMB/RMB] Add/Remove block", 10, 90);
 
         // Create box to show selected box
         selectionBox = new QuadBox("SelectionBox", new Vector3(), 0.501, 0.501, 0.501);
+        selectionBox.getSceneHints().setNormalsMode(NormalsMode.Off);
         selectionBox.setDefaultColor(new ColorRGBA(0.1f, 0.1f, 0.1f, 0.4f));
         selectionBox.getSceneHints().setRenderBucketType(RenderBucketType.Skip);
         final BlendState bs = new BlendState();
@@ -215,10 +218,11 @@ public class RealGame implements ArdorCraftGame {
     }
 
     private void updateLighting() {
-        final ReadOnlyColorRGBA newColor = new ColorRGBA(fogColor).multiplyLocal(globalLight);
+        final float light = blockWorld.lookupLighting(globalLight);
+        final ReadOnlyColorRGBA newColor = new ColorRGBA(fogColor).multiplyLocal(light);
         fogState.setColor(newColor);
         skyDome.getMidColor().set(newColor);
-        skyDome.getTopColor().set(topColor).multiplyLocal(globalLight);
+        skyDome.getTopColor().set(topColor).multiplyLocal(light);
         skyDome.updateColors();
 
         GameTaskQueueManager.getManager(ContextManager.getCurrentContext()).getQueue(ArdorCraftTaskQueue.RENDER)
@@ -246,8 +250,8 @@ public class RealGame implements ArdorCraftGame {
                 (int) position.getZ(), BlockType.All);
         if (block == BlockWorld.WATER && !isInWater) {
             isInWater = true;
-            fogColor.set(0.2f, 0.3f, 0.5f, 1.0f);
-            topColor.set(0.1f, 0.2f, 0.3f, 1.0f);
+            fogColor.set(0.1f, 0.13f, 0.25f, 1.0f);
+            topColor.set(0.15f, 0.2f, 0.35f, 1.0f);
             fogState.setStart(0);
             fogState.setEnd((float) farPlane / 8);
             updateLighting();
@@ -311,7 +315,7 @@ public class RealGame implements ArdorCraftGame {
         logicalLayer.registerTrigger(new InputTrigger(new KeyPressedCondition(Key.Y), new TriggerAction() {
             @Override
             public void perform(final Canvas source, final TwoInputStates inputState, final double tpf) {
-                globalLight = Math.min(globalLight + 0.05f, 1.0f);
+                globalLight = Math.min(globalLight + 1, 15);
                 blockWorld.setGlobalLight(globalLight);
                 updateLighting();
             }
@@ -319,7 +323,7 @@ public class RealGame implements ArdorCraftGame {
         logicalLayer.registerTrigger(new InputTrigger(new KeyPressedCondition(Key.H), new TriggerAction() {
             @Override
             public void perform(final Canvas source, final TwoInputStates inputState, final double tpf) {
-                globalLight = Math.max(globalLight - 0.05f, 0.1f);
+                globalLight = Math.max(globalLight - 1, 0);
                 blockWorld.setGlobalLight(globalLight);
                 updateLighting();
             }
@@ -333,13 +337,6 @@ public class RealGame implements ArdorCraftGame {
                     final Voxelator voxelator = new Voxelator(blockWorld, 50, 50, 50);
                     voxelator.voxelate(addPos, new Teapot(), 1.0f, 43);
                 }
-            }
-        }));
-
-        logicalLayer.registerTrigger(new InputTrigger(new KeyPressedCondition(Key.G), new TriggerAction() {
-            @Override
-            public void perform(final Canvas source, final TwoInputStates inputState, final double tpf) {
-                player.getPosition().set(0, height, 0);
             }
         }));
 
@@ -371,5 +368,4 @@ public class RealGame implements ArdorCraftGame {
             blockWorld.setBlock(deletePos.x, deletePos.y, deletePos.z, 0, true);
         }
     }
-
 }
