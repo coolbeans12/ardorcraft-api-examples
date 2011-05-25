@@ -38,7 +38,7 @@ public class SimpleGame implements ArdorCraftGame {
 
     private BlockWorld blockWorld;
     private final int tileSize = 16;
-    private final int gridSize = 16;
+    private final int gridSize = 10;
     private final int height = 64;
     private final double farPlane = (gridSize - 1) / 2 * tileSize;
 
@@ -79,7 +79,7 @@ public class SimpleGame implements ArdorCraftGame {
 
         // Create player object
         player = new PlayerBase();
-        player.getPosition().set(0, 50, 0);
+        player.getPosition().set(0, 30, 0);
         FlyControl.setupTriggers(player, logicalLayer, Vector3.UNIT_Y, true);
 
         // Create block world. Not setting any map file leads to automatic creation of a world.acr map file (which is
