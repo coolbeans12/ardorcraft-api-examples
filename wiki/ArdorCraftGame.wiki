@@ -1,0 +1,6 @@
+#summary ArdorCraft, a game built using the Ardorcraft API
+#labels Game
+
+= Status =
+
+* Working on NPC behavior: http://www.youtube.com/watch?v=FZKYiNBafUc
