@@ -174,7 +174,7 @@ public class AdvancedGame implements ArdorCraftGame {
         if (intersectionResult.hit) {
             final Pos addPos = intersectionResult.oldPos;
             if (!player.isPlayerSpace(addPos)) {
-                blockWorld.setBlock(addPos.x, addPos.y, addPos.z, 1, true);
+                blockWorld.setBlock(addPos.x, addPos.y, addPos.z, 1);
             }
         }
     }
@@ -183,7 +183,7 @@ public class AdvancedGame implements ArdorCraftGame {
         blockWorld.traceCollision(player.getPosition(), player.getDirection(), 200, intersectionResult);
         if (intersectionResult.hit) {
             final Pos deletePos = intersectionResult.pos;
-            blockWorld.setBlock(deletePos.x, deletePos.y, deletePos.z, 0, true);
+            blockWorld.setBlock(deletePos.x, deletePos.y, deletePos.z, 0);
         }
     }
 
