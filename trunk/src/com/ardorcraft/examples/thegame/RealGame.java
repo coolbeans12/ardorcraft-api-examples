@@ -36,9 +36,11 @@ import com.ardor3d.renderer.queue.RenderBucketType;
 import com.ardor3d.renderer.state.BlendState;
 import com.ardor3d.renderer.state.FogState;
 import com.ardor3d.renderer.state.WireframeState;
+import com.ardor3d.scenegraph.Mesh;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.scenegraph.hint.LightCombineMode;
 import com.ardor3d.scenegraph.hint.NormalsMode;
+import com.ardor3d.scenegraph.shape.Pyramid;
 import com.ardor3d.scenegraph.shape.Teapot;
 import com.ardor3d.ui.text.BasicText;
 import com.ardor3d.util.GameTaskQueueManager;
@@ -49,13 +51,18 @@ import com.ardorcraft.base.CanvasRelayer;
 import com.ardorcraft.collision.IntersectionResult;
 import com.ardorcraft.data.Pos;
 import com.ardorcraft.generators.NiceDataGenerator;
+import com.ardorcraft.geometryproducers.MeshProducer;
 import com.ardorcraft.objects.QuadBox;
 import com.ardorcraft.objects.SkyDome;
 import com.ardorcraft.player.PlayerWithPhysics;
+import com.ardorcraft.util.BlockUtil;
+import com.ardorcraft.util.geometryproducers.BoxProducer;
 import com.ardorcraft.util.queue.ArdorCraftTaskQueue;
 import com.ardorcraft.voxel.Voxelator;
 import com.ardorcraft.world.BlockWorld;
+import com.ardorcraft.world.BlockWorld.BlockSide;
 import com.ardorcraft.world.BlockWorld.BlockType;
+import com.ardorcraft.world.BlockWorld.Type;
 import com.ardorcraft.world.WorldSettings;
 import com.google.common.base.Predicate;
 
@@ -90,7 +97,7 @@ public class RealGame implements ArdorCraftGame {
     private int globalLight = 15;
     private boolean isInWater = false;
     private final int[] blockTypeLookup = new int[] {
-            1, 2, 4, 5, 20, 45, 12, 52, 48, 50
+            1, 47, 4, 5, 20, 95, 12, 45, 48, 50
     };
 
     @Override
@@ -174,6 +181,17 @@ public class RealGame implements ArdorCraftGame {
         settings.setGridSize(gridSize);
 
         blockWorld = new BlockWorld(settings);
+
+        // Set block 45 (brickblock) to be a pyramid drawn with the meshproducer
+        final BlockUtil blockUtil = blockWorld.getBlockUtil();
+        final int blockId = 45;
+        blockUtil.setBlockMapping(blockId, 7, 0); // brick block tile coords
+        blockUtil.setBlockType(blockId, Type.Transparent); // Not covering the entire box block = not solid
+        final Mesh mesh = new Pyramid("pyramid", 1.0, 1.0);
+        final MeshProducer meshProducer = new MeshProducer(mesh);
+        meshProducer.createOrientations(); // create all permutation rotations of the mesh
+        meshProducer.setTransformTextureCoords(true); // transform 0-1 texcoords to the specific tile
+        blockUtil.setGeometryProducer(blockId, meshProducer);
 
         worldNode = blockWorld.getWorldNode();
         root.attachChild(worldNode);
@@ -357,7 +375,8 @@ public class RealGame implements ArdorCraftGame {
         if (intersectionResult.hit) {
             final Pos addPos = intersectionResult.oldPos;
             if (!player.isPlayerSpace(addPos)) {
-                blockWorld.setBlock(addPos.x, addPos.y, addPos.z, blockType, true);
+                final BlockSide orientation = getOrientation(blockType);
+                blockWorld.setBlock(addPos.x, addPos.y, addPos.z, blockType, orientation);
             }
         }
     }
@@ -365,7 +384,53 @@ public class RealGame implements ArdorCraftGame {
     private void removeBlock() {
         if (intersectionResult.hit) {
             final Pos deletePos = intersectionResult.pos;
-            blockWorld.setBlock(deletePos.x, deletePos.y, deletePos.z, 0, true);
+            blockWorld.setBlock(deletePos.x, deletePos.y, deletePos.z, 0);
         }
+    }
+
+    private BlockSide getOrientation(final int blockId) {
+        BlockSide orientation = BlockSide.Front;
+
+        if (blockWorld.getBlockUtil().getGeometryProducer(blockId) instanceof BoxProducer) {
+            final Vector3 dir = player.getDirection();
+            if (Math.abs(dir.getX()) > Math.abs(dir.getZ())) {
+                if (dir.getX() < 0) {
+                    orientation = BlockSide.Right;
+                } else {
+                    orientation = BlockSide.Left;
+                }
+            } else {
+                if (dir.getZ() < 0) {
+                    orientation = BlockSide.Front;
+                } else {
+                    orientation = BlockSide.Back;
+                }
+            }
+        } else {
+            final int xDir = intersectionResult.oldPos.x - intersectionResult.pos.x;
+            final int yDir = intersectionResult.oldPos.y - intersectionResult.pos.y;
+            final int zDir = intersectionResult.oldPos.z - intersectionResult.pos.z;
+            if (xDir != 0) {
+                if (xDir > 0) {
+                    orientation = BlockSide.Right;
+                } else {
+                    orientation = BlockSide.Left;
+                }
+            } else if (yDir != 0) {
+                if (yDir > 0) {
+                    orientation = BlockSide.Bottom;
+                } else {
+                    orientation = BlockSide.Top;
+                }
+            } else if (zDir != 0) {
+                if (zDir > 0) {
+                    orientation = BlockSide.Front;
+                } else {
+                    orientation = BlockSide.Back;
+                }
+            }
+        }
+
+        return orientation;
     }
 }

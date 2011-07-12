@@ -162,7 +162,7 @@ public class IntermediateGame implements ArdorCraftGame {
                     for (int x = 0; x < 3; x++) {
                         for (int y = 0; y < 3; y++) {
                             for (int z = 0; z < 3; z++) {
-                                blockWorld.setBlock(addPos.x + x - 1, addPos.y + y - 1, addPos.z + z - 1, 3, true);
+                                blockWorld.setBlock(addPos.x + x - 1, addPos.y + y - 1, addPos.z + z - 1, 3);
                             }
                         }
                     }
@@ -178,7 +178,7 @@ public class IntermediateGame implements ArdorCraftGame {
                     for (int x = 0; x < 3; x++) {
                         for (int y = 0; y < 3; y++) {
                             for (int z = 0; z < 3; z++) {
-                                blockWorld.setBlock(addPos.x + x - 1, addPos.y + y - 1, addPos.z + z - 1, 0, true);
+                                blockWorld.setBlock(addPos.x + x - 1, addPos.y + y - 1, addPos.z + z - 1, 0);
                             }
                         }
                     }
@@ -198,20 +198,18 @@ public class IntermediateGame implements ArdorCraftGame {
     public void resize(final int newWidth, final int newHeight) {}
 
     private void addBlock() {
-        blockWorld
-                .traceCollision(player.getPosition(), player.getDirection(), 200, intersectionResult);
+        blockWorld.traceCollision(player.getPosition(), player.getDirection(), 200, intersectionResult);
         if (intersectionResult.hit) {
             final Pos addPos = intersectionResult.oldPos;
-            blockWorld.setBlock(addPos.x, addPos.y, addPos.z, 3, true);
+            blockWorld.setBlock(addPos.x, addPos.y, addPos.z, 3);
         }
     }
 
     private void removeBlock() {
-        blockWorld
-                .traceCollision(player.getPosition(), player.getDirection(), 200, intersectionResult);
+        blockWorld.traceCollision(player.getPosition(), player.getDirection(), 200, intersectionResult);
         if (intersectionResult.hit) {
             final Pos deletePos = intersectionResult.pos;
-            blockWorld.setBlock(deletePos.x, deletePos.y, deletePos.z, 0, true);
+            blockWorld.setBlock(deletePos.x, deletePos.y, deletePos.z, 0);
         }
     }
 
