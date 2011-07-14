@@ -104,7 +104,7 @@ public class RealGame implements ArdorCraftGame {
     public void update(final ReadOnlyTimer timer) {
         player.update(blockWorld, timer);
 
-        blockWorld.traceCollision(player.getPosition(), player.getDirection(), 50, intersectionResult);
+        blockWorld.tracePicking(player.getPosition(), player.getDirection(), 50, intersectionResult);
         if (intersectionResult.hit) {
             final Pos hitPos = intersectionResult.pos;
             selectionBox.setTranslation(hitPos.x + 0.5, hitPos.y + 0.5, hitPos.z + 0.5);
