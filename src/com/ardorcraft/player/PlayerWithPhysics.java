@@ -75,10 +75,10 @@ public class PlayerWithPhysics extends PlayerWithCollision {
         final int Z = (int) MathUtils.floor(position.getZ());
 
         int block = blockScene.getBlock(X, Y, Z, BlockType.All);
-        if (block != 0 && block != BlockWorld.WATER) {
+        if (block != 0 && blockScene.getBlockUtil().getIsCollidable(block)) {
             for (int y = Y; y < blockScene.getHeight(); y++) {
                 block = blockScene.getBlock(X, y, Z, BlockType.All);
-                if (block == 0 || block == BlockWorld.WATER) {
+                if (block == 0 || !blockScene.getBlockUtil().getIsCollidable(block)) {
                     position.setY(y + 2);
                     break;
                 }
