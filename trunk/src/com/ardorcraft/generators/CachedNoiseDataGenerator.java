@@ -2,7 +2,6 @@
 package com.ardorcraft.generators;
 
 import com.ardorcraft.util.ImprovedNoise;
-import com.ardorcraft.world.BlockWorld.BlockType;
 import com.ardorcraft.world.WorldModifier;
 
 public class CachedNoiseDataGenerator extends LayerDataGenerator {
@@ -58,8 +57,8 @@ public class CachedNoiseDataGenerator extends LayerDataGenerator {
     }
 
     @Override
-    public void generateChunk(final int xStart, final int zStart, final int xEnd, final int zEnd, final int height,
-            final WorldModifier blockScene) {
+    public void generateChunk(final int xStart, final int zStart, final int xEnd, final int zEnd, int spacing,
+            final int height, final WorldModifier blockScene) {
         this.xStart = xStart;
         this.zStart = zStart;
 
@@ -77,7 +76,7 @@ public class CachedNoiseDataGenerator extends LayerDataGenerator {
             }
         }
 
-        super.generateChunk(xStart, zStart, xEnd, zEnd, height, blockScene);
+        super.generateChunk(xStart, zStart, xEnd, zEnd, spacing, height, blockScene);
     }
 
     @Override
@@ -97,7 +96,7 @@ public class CachedNoiseDataGenerator extends LayerDataGenerator {
             return (int) Math.abs((interpolatedNoise(noiseCache1, x, 0, z) + 0.5) * 30
                     + (interpolatedNoise(noiseCache3, x, 0, z) + 0.5) * 20);
         } else if (layer == 3) {
-            final int block = blockScene.getBlock(x, y - 1, z, BlockType.All);
+            final int block = blockScene.getBlock(x, y - 1, z);
             if (block == 3) {
                 return 1;
             }

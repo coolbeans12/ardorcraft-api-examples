@@ -11,6 +11,7 @@
 package com.ardorcraft.examples.thegame;
 
 import java.io.File;
+import java.net.URISyntaxException;
 import java.util.concurrent.Callable;
 
 import com.ardor3d.framework.Canvas;
@@ -43,26 +44,29 @@ import com.ardor3d.scenegraph.hint.NormalsMode;
 import com.ardor3d.scenegraph.shape.Pyramid;
 import com.ardor3d.scenegraph.shape.Teapot;
 import com.ardor3d.ui.text.BasicText;
+import com.ardor3d.util.GameTaskQueue;
 import com.ardor3d.util.GameTaskQueueManager;
 import com.ardor3d.util.ReadOnlyTimer;
 import com.ardor3d.util.resource.ResourceLocatorTool;
+import com.ardor3d.util.resource.SimpleResourceLocator;
 import com.ardorcraft.base.ArdorCraftGame;
 import com.ardorcraft.base.CanvasRelayer;
 import com.ardorcraft.collision.IntersectionResult;
 import com.ardorcraft.data.Pos;
 import com.ardorcraft.generators.NiceDataGenerator;
-import com.ardorcraft.geometryproducers.MeshProducer;
+import com.ardorcraft.network.LocalServerConnection;
+import com.ardorcraft.network.LocalServerDataHandler;
 import com.ardorcraft.objects.QuadBox;
 import com.ardorcraft.objects.SkyDome;
 import com.ardorcraft.player.PlayerWithPhysics;
 import com.ardorcraft.util.BlockUtil;
 import com.ardorcraft.util.geometryproducers.BoxProducer;
-import com.ardorcraft.util.queue.ArdorCraftTaskQueue;
+import com.ardorcraft.util.geometryproducers.MeshProducer;
 import com.ardorcraft.voxel.Voxelator;
+import com.ardorcraft.world.BlockSide;
+import com.ardorcraft.world.BlockType;
 import com.ardorcraft.world.BlockWorld;
-import com.ardorcraft.world.BlockWorld.BlockSide;
-import com.ardorcraft.world.BlockWorld.BlockType;
-import com.ardorcraft.world.BlockWorld.Type;
+import com.ardorcraft.world.IServerConnection;
 import com.ardorcraft.world.WorldSettings;
 import com.google.common.base.Predicate;
 
@@ -74,7 +78,7 @@ public class RealGame implements ArdorCraftGame {
     private BlockWorld blockWorld;
     private final int tileSize = 16;
     private final int gridSize = 16;
-    private final int height = 128;
+    private final int height = 180;
     private final double farPlane = (gridSize - 1) / 2 * tileSize;
 
     private final IntersectionResult intersectionResult = new IntersectionResult();
@@ -120,7 +124,7 @@ public class RealGame implements ArdorCraftGame {
         updateFog(player.getPosition());
 
         // The infinite world update
-        blockWorld.updatePosition(player.getPosition());
+        blockWorld.updatePlayer(player.getPosition(), player.getDirection());
         blockWorld.update(timer);
     }
 
@@ -143,6 +147,15 @@ public class RealGame implements ArdorCraftGame {
             final PhysicalLayer physicalLayer, final MouseManager mouseManager) {
         this.root = root;
         this.canvas = canvas;
+
+        try {
+            final SimpleResourceLocator srl = new SimpleResourceLocator(ResourceLocatorTool.getClassPathResource(
+                    RealGame.class, "com/ardorcraft/resources"));
+            ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE, srl);
+            ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_MODEL, srl);
+        } catch (final URISyntaxException ex) {
+            ex.printStackTrace();
+        }
 
         canvas.setTitle("Real!");
 
@@ -174,11 +187,13 @@ public class RealGame implements ArdorCraftGame {
         settings.setTerrainTextureTileSize(32);
 
         settings.setWaterTexture(ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE, "water.png"));
-        settings.setTerrainGenerator(new NiceDataGenerator());
-        settings.setMapFile(worldFileSource);
         settings.setTileSize(tileSize);
         settings.setTileHeight(height);
         settings.setGridSize(gridSize);
+
+        final IServerConnection serverConnection = new LocalServerConnection(new LocalServerDataHandler(tileSize,
+                height, gridSize, new NiceDataGenerator(), worldFileSource));
+        settings.setServerConnection(serverConnection);
 
         blockWorld = new BlockWorld(settings);
 
@@ -186,7 +201,7 @@ public class RealGame implements ArdorCraftGame {
         final BlockUtil blockUtil = blockWorld.getBlockUtil();
         final int blockId = 45;
         blockUtil.setBlockMapping(blockId, 7, 0); // brick block tile coords
-        blockUtil.setBlockType(blockId, Type.Transparent); // Not covering the entire box block = not solid
+        blockUtil.setBlockType(blockId, BlockType.Transparent); // Not covering the entire box block = not solid
         final Mesh mesh = new Pyramid("pyramid", 1.0, 1.0);
         final MeshProducer meshProducer = new MeshProducer(mesh);
         meshProducer.createOrientations(); // create all permutation rotations of the mesh
@@ -243,7 +258,7 @@ public class RealGame implements ArdorCraftGame {
         skyDome.getTopColor().set(topColor).multiplyLocal(light);
         skyDome.updateColors();
 
-        GameTaskQueueManager.getManager(ContextManager.getCurrentContext()).getQueue(ArdorCraftTaskQueue.RENDER)
+        GameTaskQueueManager.getManager(ContextManager.getCurrentContext()).getQueue(GameTaskQueue.RENDER)
                 .enqueue(new Callable<Boolean>() {
                     @Override
                     public Boolean call() throws Exception {
@@ -265,7 +280,7 @@ public class RealGame implements ArdorCraftGame {
 
     private void updateFog(final Vector3 position) {
         final int block = blockWorld.getBlock((int) position.getX(), (int) (position.getY() + 0.15),
-                (int) position.getZ(), BlockType.All);
+                (int) position.getZ());
         if (block == BlockWorld.WATER && !isInWater) {
             isInWater = true;
             fogColor.set(0.1f, 0.13f, 0.25f, 1.0f);

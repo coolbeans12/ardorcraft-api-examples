@@ -8,7 +8,6 @@ import com.ardor3d.util.ReadOnlyTimer;
 import com.ardorcraft.control.FlyControl;
 import com.ardorcraft.control.WalkControl;
 import com.ardorcraft.world.BlockWorld;
-import com.ardorcraft.world.BlockWorld.BlockType;
 
 /**
  * A player implementation with walk/fly modes and gravity and jumping.
@@ -74,10 +73,10 @@ public class PlayerWithPhysics extends PlayerWithCollision {
         final int Y = (int) MathUtils.floor(position.getY());
         final int Z = (int) MathUtils.floor(position.getZ());
 
-        int block = blockScene.getBlock(X, Y, Z, BlockType.All);
+        int block = blockScene.getBlock(X, Y, Z);
         if (block != 0 && blockScene.getBlockUtil().getIsCollidable(block)) {
             for (int y = Y; y < blockScene.getHeight(); y++) {
-                block = blockScene.getBlock(X, y, Z, BlockType.All);
+                block = blockScene.getBlock(X, y, Z);
                 if (block == 0 || !blockScene.getBlockUtil().getIsCollidable(block)) {
                     position.setY(y + 2);
                     break;
