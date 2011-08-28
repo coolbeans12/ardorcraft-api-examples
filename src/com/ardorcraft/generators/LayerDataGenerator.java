@@ -14,8 +14,8 @@ public abstract class LayerDataGenerator implements DataGenerator {
     }
 
     @Override
-    public void generateChunk(final int xStart, final int zStart, final int xEnd, final int zEnd, final int height,
-            final WorldModifier blockScene) {
+    public void generateChunk(final int xStart, final int zStart, final int xEnd, final int zEnd, int spacing,
+            final int height, final WorldModifier blockScene) {
         for (int x = xStart; x < xEnd; x++) {
             for (int z = zStart; z < zEnd; z++) {
                 generateColumn(x, z, height, blockScene);

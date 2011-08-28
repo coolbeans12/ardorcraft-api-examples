@@ -10,6 +10,8 @@
 
 package com.ardorcraft.examples.intermediate;
 
+import java.net.URISyntaxException;
+
 import com.ardor3d.framework.Canvas;
 import com.ardor3d.input.GrabbedState;
 import com.ardor3d.input.Key;
@@ -33,14 +35,18 @@ import com.ardor3d.scenegraph.Node;
 import com.ardor3d.ui.text.BasicText;
 import com.ardor3d.util.ReadOnlyTimer;
 import com.ardor3d.util.resource.ResourceLocatorTool;
+import com.ardor3d.util.resource.SimpleResourceLocator;
 import com.ardorcraft.base.ArdorCraftGame;
 import com.ardorcraft.base.CanvasRelayer;
 import com.ardorcraft.collision.IntersectionResult;
 import com.ardorcraft.control.FlyControl;
 import com.ardorcraft.data.Pos;
 import com.ardorcraft.generators.CachedNoiseDataGenerator;
+import com.ardorcraft.network.LocalServerConnection;
+import com.ardorcraft.network.LocalServerDataHandler;
 import com.ardorcraft.player.PlayerWithCollision;
 import com.ardorcraft.world.BlockWorld;
+import com.ardorcraft.world.IServerConnection;
 import com.ardorcraft.world.WorldSettings;
 
 /**
@@ -69,7 +75,7 @@ public class IntermediateGame implements ArdorCraftGame {
         camera.setLeft(player.getLeft());
 
         // The infinite world update
-        blockWorld.updatePosition(player.getPosition());
+        blockWorld.updatePlayer(player.getPosition(), player.getDirection());
         blockWorld.update(timer);
     }
 
@@ -82,6 +88,15 @@ public class IntermediateGame implements ArdorCraftGame {
     public void init(final Node root, final CanvasRelayer canvas, final LogicalLayer logicalLayer,
             final PhysicalLayer physicalLayer, final MouseManager mouseManager) {
         this.root = root;
+
+        try {
+            final SimpleResourceLocator srl = new SimpleResourceLocator(ResourceLocatorTool.getClassPathResource(
+                    IntermediateGame.class, "com/ardorcraft/resources"));
+            ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE, srl);
+            ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_MODEL, srl);
+        } catch (final URISyntaxException ex) {
+            ex.printStackTrace();
+        }
 
         canvas.setTitle("Intermediate");
         canvas.getCanvasRenderer().getRenderer().setBackgroundColor(fogColor);
@@ -104,10 +119,14 @@ public class IntermediateGame implements ArdorCraftGame {
         settings.setTerrainTexture(ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE, "terrainQ.png"));
         settings.setTerrainTextureTileSize(16);
         settings.setWaterTexture(ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE, "water.png"));
-        settings.setTerrainGenerator(new CachedNoiseDataGenerator(6, tileSize, height));
         settings.setTileSize(tileSize);
         settings.setTileHeight(height);
         settings.setGridSize(gridSize);
+
+        // Create a local "fake" server
+        final IServerConnection serverConnection = new LocalServerConnection(new LocalServerDataHandler(tileSize,
+                height, gridSize, new CachedNoiseDataGenerator(6, tileSize, height), null));
+        settings.setServerConnection(serverConnection);
 
         blockWorld = new BlockWorld(settings);
 

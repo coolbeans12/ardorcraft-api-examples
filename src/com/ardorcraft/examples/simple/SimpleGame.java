@@ -10,6 +10,8 @@
 
 package com.ardorcraft.examples.simple;
 
+import java.net.URISyntaxException;
+
 import com.ardor3d.input.MouseManager;
 import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.input.logical.LogicalLayer;
@@ -22,12 +24,16 @@ import com.ardor3d.renderer.state.FogState;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.util.ReadOnlyTimer;
 import com.ardor3d.util.resource.ResourceLocatorTool;
+import com.ardor3d.util.resource.SimpleResourceLocator;
 import com.ardorcraft.base.ArdorCraftGame;
 import com.ardorcraft.base.CanvasRelayer;
 import com.ardorcraft.control.FlyControl;
 import com.ardorcraft.generators.LayerDataGenerator;
+import com.ardorcraft.network.LocalServerConnection;
+import com.ardorcraft.network.LocalServerDataHandler;
 import com.ardorcraft.player.PlayerBase;
 import com.ardorcraft.world.BlockWorld;
+import com.ardorcraft.world.IServerConnection;
 import com.ardorcraft.world.WorldModifier;
 import com.ardorcraft.world.WorldSettings;
 
@@ -40,7 +46,7 @@ public class SimpleGame implements ArdorCraftGame {
     private final int tileSize = 16;
     private final int gridSize = 10;
     private final int height = 64;
-    private final double farPlane = (gridSize - 1) / 2 * tileSize;
+    private final double farPlane = 10000;// (gridSize - 1) / 2 * tileSize;
 
     private final ReadOnlyColorRGBA fogColor = new ColorRGBA(0.9f, 0.9f, 1.0f, 1.0f);
     private Node root;
@@ -55,7 +61,7 @@ public class SimpleGame implements ArdorCraftGame {
         camera.setLeft(player.getLeft());
 
         // The infinite world update
-        blockWorld.updatePosition(player.getPosition());
+        blockWorld.updatePlayer(player.getPosition(), player.getDirection());
         blockWorld.update(timer);
     }
 
@@ -68,6 +74,15 @@ public class SimpleGame implements ArdorCraftGame {
     public void init(final Node root, final CanvasRelayer canvas, final LogicalLayer logicalLayer,
             final PhysicalLayer physicalLayer, final MouseManager mouseManager) {
         this.root = root;
+
+        try {
+            final SimpleResourceLocator srl = new SimpleResourceLocator(ResourceLocatorTool.getClassPathResource(
+                    SimpleGame.class, "com/ardorcraft/resources"));
+            ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE, srl);
+            ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_MODEL, srl);
+        } catch (final URISyntaxException ex) {
+            ex.printStackTrace();
+        }
 
         canvas.setTitle("Simple");
         canvas.getCanvasRenderer().getRenderer().setBackgroundColor(fogColor);
@@ -88,10 +103,15 @@ public class SimpleGame implements ArdorCraftGame {
         settings.setTerrainTexture(ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE, "terrainQ.png"));
         settings.setTerrainTextureTileSize(16);
         settings.setWaterTexture(ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE, "water.png"));
-        settings.setTerrainGenerator(simpleSineGenerator);
         settings.setTileSize(tileSize);
         settings.setTileHeight(height);
         settings.setGridSize(gridSize);
+        settings.setUseVBO(false);
+
+        // Create a local "fake" server
+        final IServerConnection serverConnection = new LocalServerConnection(new LocalServerDataHandler(tileSize,
+                height, gridSize, simpleSineGenerator, null));
+        settings.setServerConnection(serverConnection);
 
         blockWorld = new BlockWorld(settings);
         root.attachChild(blockWorld.getWorldNode());
