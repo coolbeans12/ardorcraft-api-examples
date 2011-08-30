@@ -32,6 +32,10 @@ import javax.swing.event.ChangeListener;
 import com.ardor3d.math.MathUtils;
 import com.ardorcraft.world.WorldModifier;
 
+/**
+ * Use this to play around more easily with your terrain generators.
+ * 
+ */
 public class GeneratorViewer {
     private static final Logger logger = Logger.getLogger(GeneratorViewer.class.getName());
 

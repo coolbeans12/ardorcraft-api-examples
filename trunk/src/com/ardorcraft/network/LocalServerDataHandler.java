@@ -19,6 +19,9 @@ import com.ardorcraft.world.WorldModifier;
 import com.ardorcraft.world.utils.ChunkDistanceComparator;
 import com.google.common.collect.Lists;
 
+/**
+ * Simple data handler that works against a map file.
+ */
 public class LocalServerDataHandler {
     private static final Logger logger = Logger.getLogger(LocalServerDataHandler.class.getName());
 
@@ -98,8 +101,8 @@ public class LocalServerDataHandler {
                 }
 
                 synchronized (generator) {
-                    generator.generateChunk(xx * width, zz * width, xx * width + width, zz * width + width, 1,
-                            height, worldEdit);
+                    generator.generateChunk(xx * width, zz * width, xx * width + width, zz * width + width, 1, height,
+                            worldEdit);
                     Thread.yield();
 
                     worldFile.save(xx, zz, localBlock);

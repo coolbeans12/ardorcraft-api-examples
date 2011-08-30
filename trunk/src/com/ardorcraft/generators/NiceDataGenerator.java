@@ -6,12 +6,14 @@ import java.util.Random;
 
 import com.ardor3d.math.MathUtils;
 import com.ardorcraft.data.Pos;
-import com.ardorcraft.generators.DataGenerator;
 import com.ardorcraft.util.ImprovedNoise;
 import com.ardorcraft.world.BlockWorld;
 import com.ardorcraft.world.WorldModifier;
 import com.google.common.collect.Lists;
 
+/**
+ * Some nice terrain with trees.
+ */
 public class NiceDataGenerator implements DataGenerator {
     private final int waterHeight = 20;
 

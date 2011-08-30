@@ -8,6 +8,9 @@ import com.ardorcraft.collision.IntersectionResult;
 import com.ardorcraft.data.Pos;
 import com.ardorcraft.world.BlockWorld;
 
+/**
+ * Player implementation with collision against the world
+ */
 public class PlayerWithCollision extends PlayerBase {
     protected final Vector3 oldLocation = new Vector3();
     protected final Vector3 currentLocation = new Vector3();

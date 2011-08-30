@@ -10,6 +10,11 @@ import com.ardorcraft.world.Chunk;
 import com.ardorcraft.world.ChunkModifier;
 import com.ardorcraft.world.IServerConnection;
 
+/**
+ * "Fake" local server implementation which just generate data upon request throught the LocalServerDataHandler and
+ * pongs the data back. For real server/client communication, just implement the IServerConnection and send the requests
+ * etc to your server.
+ */
 public class LocalServerConnection implements IServerConnection {
     private final LocalServerDataHandler server;
     private ChunkModifier chunkModifier;
