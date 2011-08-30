@@ -1,0 +1,14 @@
+#summary Useful code and tools in the API
+
+== Useful code ==
+
+  * *BlockUtil* - Where all block type configurations are done (get this object from the BlockWorld, getBlockUtil)
+  * *ConstrainedAStar* - Path finding
+  * *ImprovedNoise* - Perlin noise useful in terrain generation
+  * *WorldFile* - The ArdorCraft map file
+
+== Useful tools ==
+  
+  * *[https://code.google.com/p/ardorcraft-api-examples/source/browse/trunk/src/com/ardorcraft/generators/GeneratorViewer.java GeneratorViewer]* - Try out your terrain generation code with this 2D viewer. Supports zooming out, and is multi-threaded.  
+
+  * *[https://code.google.com/p/ardorcraft-api-examples/source/browse/trunk/src/com/ardorcraft/converter/MinecraftMapConverter.java MinecraftMapConverter]* - Convert minecraft maps to ardorcraft. Needs to be improved
