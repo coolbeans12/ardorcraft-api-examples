@@ -3,6 +3,7 @@
 
 = Pick your topic =
 
+  * [https://code.google.com/p/ardorcraft-api-examples/wiki/GettingStarted Setup the Project]
   * [http://ardor3d.com/wiki/start It's easier if you already know Ardor3D]
   * [https://code.google.com/p/ardorcraft-api-examples/wiki/FirstBlockWorld Creating your first block world]
   * Create your own terrain
