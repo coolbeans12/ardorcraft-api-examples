@@ -77,8 +77,8 @@ public class RealGame implements ArdorCraftGame {
 
     private BlockWorld blockWorld;
     private final int tileSize = 16;
-    private final int gridSize = 16;
-    private final int height = 180;
+    private final int gridSize = 20;
+    private final int height = 150;
     private final double farPlane = (gridSize - 1) / 2 * tileSize;
 
     private final IntersectionResult intersectionResult = new IntersectionResult();
@@ -400,6 +400,11 @@ public class RealGame implements ArdorCraftGame {
         if (intersectionResult.hit) {
             final Pos deletePos = intersectionResult.pos;
             blockWorld.setBlock(deletePos.x, deletePos.y, deletePos.z, 0);
+
+            final int aboveBlock = blockWorld.getBlock(deletePos.x, deletePos.y + 1, deletePos.z);
+            if (aboveBlock > 99 && aboveBlock < 108) {
+                blockWorld.setBlock(deletePos.x, deletePos.y + 1, deletePos.z, 0);
+            }
         }
     }
 
