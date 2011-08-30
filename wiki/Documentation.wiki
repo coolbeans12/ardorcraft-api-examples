@@ -4,7 +4,7 @@
 = Pick your topic =
 
   * [http://ardor3d.com/wiki/start It's easier if you already know Ardor3D]
-  * Creating your first block world
+  * [https://code.google.com/p/ardorcraft-api-examples/wiki/FirstBlockWorld Creating your first block world]
   * Create your own terrain
   * Configure block properties
   * Multiplayer (Client/Server)
