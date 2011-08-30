@@ -56,7 +56,7 @@ public class AdvancedGame implements ArdorCraftGame {
     private BlockWorld blockWorld;
     private final int tileSize = 16;
     private final int height = 100;
-    private final int gridSize = 16;
+    private final int gridSize = 20;
     private final double farPlane = (gridSize - 1) / 2 * tileSize;
 
     private final ReadOnlyColorRGBA fogColor = new ColorRGBA(0.9f, 0.9f, 1.0f, 1.0f);
