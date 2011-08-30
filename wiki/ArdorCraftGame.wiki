@@ -3,7 +3,7 @@
 
 = Status =
 
-* Still being rewritten against this new API
-* Currently working on NPC behavior: 
+  * Still being rewritten against this new API
+  * Currently working on NPC behavior: 
 
 <wiki:video url="http://www.youtube.com/watch?v=FZKYiNBafUc"/>
