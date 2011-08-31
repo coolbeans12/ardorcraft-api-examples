@@ -84,7 +84,7 @@ public class SimpleGame implements ArdorCraftGame {
             ex.printStackTrace();
         }
 
-        canvas.setTitle("Simple");
+        canvas.setTitle("ArdorCraft API Example - SimpleGame.java");
         canvas.getCanvasRenderer().getRenderer().setBackgroundColor(fogColor);
 
         camera = canvas.getCanvasRenderer().getCamera();

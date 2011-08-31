@@ -97,7 +97,7 @@ public class AdvancedGame implements ArdorCraftGame {
             ex.printStackTrace();
         }
 
-        canvas.setTitle("Advanced");
+        canvas.setTitle("ArdorCraft API Example - AdvancedGame.java");
         canvas.getCanvasRenderer().getRenderer().setBackgroundColor(fogColor);
 
         camera = canvas.getCanvasRenderer().getCamera();
