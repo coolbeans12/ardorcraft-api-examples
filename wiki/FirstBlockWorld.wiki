@@ -1,3 +1,5 @@
+#summary Creating a BlockWorld
+
 = Simplest setup =
 
 (Based on the SimpleGame example in the source)
