@@ -2,8 +2,8 @@
 
 == Try the examples included in the API ==
 
-  * [http://ardorlabs.se/ArdorCraftAPIExample/ArdorCraftAPIExampleSimple.jnlp Run SimpleGame!] - Simplest example possible. [https://code.google.com/p/ardorcraft-api-examples/source/browse/trunk/src/com/ardorcraft/examples/simple/SimpleGame.java (Source)]
-  * [http://ardorlabs.se/ArdorCraftAPIExample/ArdorCraftAPIExampleIntermediate.jnlp Run IntermediateGame!] - Adding some more terrain generation, player collision and block editing. [https://code.google.com/p/ardorcraft-api-examples/source/browse/trunk/src/com/ardorcraft/examples/intermediate/IntermediateGame.java (Source)]
-  * [http://ardorlabs.se/ArdorCraftAPIExample/ArdorCraftAPIExampleReal.jnlp Run RealGame!] - More involved terrain generation. Set various types of blocks. Change global lighting etc etc. [https://code.google.com/p/ardorcraft-api-examples/source/browse/trunk/src/com/ardorcraft/examples/thegame/RealGame.java (Source)]
+  * [http://ardorlabs.se/ArdorCraftAPIExample/ArdorCraftAPIExampleSimple.jnlp Run Simple Example!] - Simplest example possible. [https://code.google.com/p/ardorcraft-api-examples/source/browse/trunk/src/com/ardorcraft/examples/simple/SimpleGame.java (Source)]
+  * [http://ardorlabs.se/ArdorCraftAPIExample/ArdorCraftAPIExampleIntermediate.jnlp Run Intermediate Example!] - Adding some more terrain generation, player collision and block editing. [https://code.google.com/p/ardorcraft-api-examples/source/browse/trunk/src/com/ardorcraft/examples/intermediate/IntermediateGame.java (Source)]
+  * *[http://ardorlabs.se/ArdorCraftAPIExample/ArdorCraftAPIExampleReal.jnlp Run Advanced Example!]* - More involved terrain generation. Set various types of blocks. Change global lighting. Try mesh voxelization. Vegetation etc. [https://code.google.com/p/ardorcraft-api-examples/source/browse/trunk/src/com/ardorcraft/examples/thegame/RealGame.java (Source)]
 
 http://i.imgur.com/cIcjIl.jpg
