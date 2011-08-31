@@ -98,7 +98,7 @@ public class IntermediateGame implements ArdorCraftGame {
             ex.printStackTrace();
         }
 
-        canvas.setTitle("Intermediate");
+        canvas.setTitle("ArdorCraft API Example - IntermediateGame.java");
         canvas.getCanvasRenderer().getRenderer().setBackgroundColor(fogColor);
 
         camera = canvas.getCanvasRenderer().getCamera();

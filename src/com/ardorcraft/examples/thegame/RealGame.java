@@ -157,7 +157,7 @@ public class RealGame implements ArdorCraftGame {
             ex.printStackTrace();
         }
 
-        canvas.setTitle("Real!");
+        canvas.setTitle("ArdorCraft API Example - RealGame.java");
 
         camera = canvas.getCanvasRenderer().getCamera();
         camera.setFrustumPerspective(75.0, (float) camera.getWidth() / (float) camera.getHeight(), 0.1, farPlane);
