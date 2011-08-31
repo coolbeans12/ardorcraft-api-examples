@@ -5,3 +5,5 @@
   * [http://ardorlabs.se/ArdorCraftAPIExample/ArdorCraftAPIExampleSimple.jnlp SimpleGame] - Simplest example possible.
   * [http://ardorlabs.se/ArdorCraftAPIExample/ArdorCraftAPIExampleIntermediate.jnlp IntermediateGame] - Adding some more terrain generation, player collision and block editing.
   * [http://ardorlabs.se/ArdorCraftAPIExample/ArdorCraftAPIExampleReal.jnlp RealGame] - More involved terrain generation. Set various types of blocks. Change global lighting etc etc.
+
+http://i.imgur.com/cIcjIl.jpg
