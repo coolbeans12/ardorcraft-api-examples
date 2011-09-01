@@ -98,7 +98,7 @@ public class RealGame implements ArdorCraftGame {
     private QuadBox selectionBox;
 
     private int blockType = 1;
-    private int globalLight = 15;
+    private float globalLight = 1f;
     private boolean isInWater = false;
     private final int[] blockTypeLookup = new int[] {
             1, 47, 4, 5, 20, 95, 12, 45, 48, 50
@@ -251,7 +251,7 @@ public class RealGame implements ArdorCraftGame {
     }
 
     private void updateLighting() {
-        final float light = blockWorld.lookupLighting(globalLight);
+        final float light = globalLight * 0.9f + 0.1f;
         final ReadOnlyColorRGBA newColor = new ColorRGBA(fogColor).multiplyLocal(light);
         fogState.setColor(newColor);
         skyDome.getMidColor().set(newColor);
@@ -345,18 +345,18 @@ public class RealGame implements ArdorCraftGame {
             public void perform(final Canvas source, final TwoInputStates inputState, final double tpf) {}
         }));
 
-        logicalLayer.registerTrigger(new InputTrigger(new KeyPressedCondition(Key.Y), new TriggerAction() {
+        logicalLayer.registerTrigger(new InputTrigger(new KeyHeldCondition(Key.Y), new TriggerAction() {
             @Override
             public void perform(final Canvas source, final TwoInputStates inputState, final double tpf) {
-                globalLight = Math.min(globalLight + 1, 15);
+                globalLight = (float) Math.min(globalLight + tpf * 0.4, 1);
                 blockWorld.setGlobalLight(globalLight);
                 updateLighting();
             }
         }));
-        logicalLayer.registerTrigger(new InputTrigger(new KeyPressedCondition(Key.H), new TriggerAction() {
+        logicalLayer.registerTrigger(new InputTrigger(new KeyHeldCondition(Key.H), new TriggerAction() {
             @Override
             public void perform(final Canvas source, final TwoInputStates inputState, final double tpf) {
-                globalLight = Math.max(globalLight - 1, 0);
+                globalLight = (float) Math.max(globalLight - tpf * 0.4, 0);
                 blockWorld.setGlobalLight(globalLight);
                 updateLighting();
             }
