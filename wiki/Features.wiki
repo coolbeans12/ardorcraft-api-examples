@@ -15,6 +15,7 @@
     * Plug in your own terrain generation code
 
   * 100% fixed function, no shaders or fancy requirements. Runs on pretty much any computer.
+  * Infinite world
   * Works seamlessly with the Ardor3D scenegraph engine
   * Fully configurable colors for sunlight, moonlight, cavelight and torchlight
   * Smooth fast day/night cycle updates without needing any chunk updates
