@@ -1,4 +1,5 @@
 #summary Try out the examples through Java Webstart
+#labels Examples
 
 == Try the examples included in the API ==
 
