@@ -14,6 +14,8 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.util.concurrent.Callable;
 
+import javax.swing.WindowConstants;
+
 import com.ardor3d.framework.Canvas;
 import com.ardor3d.input.GrabbedState;
 import com.ardor3d.input.Key;
@@ -53,7 +55,7 @@ import com.ardorcraft.base.ArdorCraftGame;
 import com.ardorcraft.base.CanvasRelayer;
 import com.ardorcraft.collision.IntersectionResult;
 import com.ardorcraft.data.Pos;
-import com.ardorcraft.generators.NiceDataGenerator;
+import com.ardorcraft.generators.DataGenerator;
 import com.ardorcraft.network.LocalServerConnection;
 import com.ardorcraft.network.LocalServerDataHandler;
 import com.ardorcraft.objects.QuadBox;
@@ -77,9 +79,8 @@ public class RealGame implements ArdorCraftGame {
 
     private BlockWorld blockWorld;
     private final int tileSize = 16;
-    private final int gridSize = 20;
     private final int height = 150;
-    private final double farPlane = (gridSize - 1) / 2 * tileSize;
+    private double farPlane = 10000.0;
 
     private final IntersectionResult intersectionResult = new IntersectionResult();
 
@@ -159,6 +160,24 @@ public class RealGame implements ArdorCraftGame {
 
         canvas.setTitle("ArdorCraft API Example - RealGame.java");
 
+        final SelectDialog dialog = new SelectDialog();
+        dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        dialog.setLocationRelativeTo(null);
+        dialog.setVisible(true);
+
+        DataGenerator dataGenerator = null;
+        try {
+            dataGenerator = (DataGenerator) dialog.getSelectedGenerator().newInstance();
+        } catch (final Exception e) {
+            e.printStackTrace();
+        }
+        final String texture = dialog.getSelectedTexture();
+        final int textureTileSize = dialog.getSelectedTextureSize();
+        final boolean doOverwriteMap = dialog.getIsOverwriteMap();
+        final int gridSize = dialog.getViewDistance();
+
+        farPlane = (gridSize - 1) / 2 * tileSize;
+
         camera = canvas.getCanvasRenderer().getCamera();
         camera.setFrustumPerspective(75.0, (float) camera.getWidth() / (float) camera.getHeight(), 0.1, farPlane);
 
@@ -172,19 +191,19 @@ public class RealGame implements ArdorCraftGame {
         registerTriggers(logicalLayer, mouseManager);
 
         // Map file to use
-        final File worldFileSource = new File("worldReal.acr");
+        final File worldFileSource = new File(dialog.getSelectedGenerator().getSimpleName() + "_Map.acr");
         // Uncomment this if you want to start your mapfile from scratch each run...
-        // if (worldFileSource.exists()) {
-        // worldFileSource.delete();
-        // }
+        if (doOverwriteMap && worldFileSource.exists()) {
+            worldFileSource.delete();
+        }
 
         // Create main blockworld handler
         final WorldSettings settings = new WorldSettings();
 
         // Here you can load any terrain texture you wish (should contain 16x16 tiles).
         // Just make sure you set the correct tilesize, that is, the subtexture size in pixels.
-        settings.setTerrainTexture(ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE, "terrain.png"));
-        settings.setTerrainTextureTileSize(32);
+        settings.setTerrainTexture(ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE, texture));
+        settings.setTerrainTextureTileSize(textureTileSize);
 
         settings.setWaterTexture(ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE, "water.png"));
         settings.setTileSize(tileSize);
@@ -192,7 +211,7 @@ public class RealGame implements ArdorCraftGame {
         settings.setGridSize(gridSize);
 
         final IServerConnection serverConnection = new LocalServerConnection(new LocalServerDataHandler(tileSize,
-                height, gridSize, new NiceDataGenerator(), worldFileSource));
+                height, gridSize, dataGenerator, worldFileSource));
         settings.setServerConnection(serverConnection);
 
         blockWorld = new BlockWorld(settings);
@@ -380,7 +399,7 @@ public class RealGame implements ArdorCraftGame {
 
     @Override
     public void destroy() {
-        blockWorld.destroy();
+        blockWorld.stopThreads();
     }
 
     @Override

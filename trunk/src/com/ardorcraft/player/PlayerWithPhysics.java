@@ -115,4 +115,13 @@ public class PlayerWithPhysics extends PlayerWithCollision {
     public FlyControl getFlyControl() {
         return flyControl;
     }
+
+    public void disableControls() {
+        walkControl.disable();
+        flyControl.disable();
+    }
+
+    public void enableControls() {
+        setWalking(walking);
+    }
 }

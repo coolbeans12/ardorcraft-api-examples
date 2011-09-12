@@ -41,7 +41,7 @@ import com.ardorcraft.base.CanvasRelayer;
 import com.ardorcraft.collision.IntersectionResult;
 import com.ardorcraft.control.FlyControl;
 import com.ardorcraft.data.Pos;
-import com.ardorcraft.generators.CachedNoiseDataGenerator;
+import com.ardorcraft.generators.InterpolatedNoiseDataGenerator;
 import com.ardorcraft.network.LocalServerConnection;
 import com.ardorcraft.network.LocalServerDataHandler;
 import com.ardorcraft.player.PlayerWithCollision;
@@ -108,13 +108,12 @@ public class IntermediateGame implements ArdorCraftGame {
 
         // Create player object
         player = new PlayerWithCollision();
-        player.getPosition().set(0, 100, 0);
+        player.getPosition().set(0, 50, 0);
         FlyControl.setupTriggers(player, logicalLayer, Vector3.UNIT_Y, false);
 
         registerTriggers(logicalLayer, mouseManager);
 
-        // Create block world. Not setting any map file leads to automatic creation of a world.acr map file (which is
-        // overwritten at each run)
+        // Create block world settings.
         final WorldSettings settings = new WorldSettings();
         settings.setTerrainTexture(ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE, "terrainQ.png"));
         settings.setTerrainTextureTileSize(16);
@@ -125,7 +124,7 @@ public class IntermediateGame implements ArdorCraftGame {
 
         // Create a local "fake" server
         final IServerConnection serverConnection = new LocalServerConnection(new LocalServerDataHandler(tileSize,
-                height, gridSize, new CachedNoiseDataGenerator(6, tileSize, height), null));
+                height, gridSize, new InterpolatedNoiseDataGenerator(), null));
         settings.setServerConnection(serverConnection);
 
         blockWorld = new BlockWorld(settings);

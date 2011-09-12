@@ -16,11 +16,10 @@ import com.ardor3d.input.MouseManager;
 import com.ardor3d.input.PhysicalLayer;
 import com.ardor3d.input.logical.LogicalLayer;
 import com.ardor3d.math.ColorRGBA;
+import com.ardor3d.math.MathUtils;
 import com.ardor3d.math.Vector3;
-import com.ardor3d.math.type.ReadOnlyColorRGBA;
 import com.ardor3d.renderer.Camera;
 import com.ardor3d.renderer.Renderer;
-import com.ardor3d.renderer.state.FogState;
 import com.ardor3d.scenegraph.Node;
 import com.ardor3d.util.ReadOnlyTimer;
 import com.ardor3d.util.resource.ResourceLocatorTool;
@@ -44,11 +43,8 @@ public class SimpleGame implements ArdorCraftGame {
 
     private BlockWorld blockWorld;
     private final int tileSize = 16;
-    private final int gridSize = 10;
-    private final int height = 64;
-    private final double farPlane = 10000;// (gridSize - 1) / 2 * tileSize;
-
-    private final ReadOnlyColorRGBA fogColor = new ColorRGBA(0.9f, 0.9f, 1.0f, 1.0f);
+    private final int gridSize = 16;
+    private final int height = 32;
     private Node root;
     private Camera camera;
     private PlayerBase player;
@@ -75,30 +71,29 @@ public class SimpleGame implements ArdorCraftGame {
             final PhysicalLayer physicalLayer, final MouseManager mouseManager) {
         this.root = root;
 
+        // Make sure the world can find the textures.
         try {
             final SimpleResourceLocator srl = new SimpleResourceLocator(ResourceLocatorTool.getClassPathResource(
                     SimpleGame.class, "com/ardorcraft/resources"));
             ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_TEXTURE, srl);
-            ResourceLocatorTool.addResourceLocator(ResourceLocatorTool.TYPE_MODEL, srl);
         } catch (final URISyntaxException ex) {
             ex.printStackTrace();
         }
 
+        // Some window details
         canvas.setTitle("ArdorCraft API Example - SimpleGame.java");
-        canvas.getCanvasRenderer().getRenderer().setBackgroundColor(fogColor);
+        canvas.getCanvasRenderer().getRenderer().setBackgroundColor(ColorRGBA.WHITE);
 
+        // Setup camera fov and view distance
         camera = canvas.getCanvasRenderer().getCamera();
-        camera.setFrustumPerspective(75.0, (float) camera.getWidth() / (float) camera.getHeight(), 0.1, farPlane);
-
-        setupFog();
+        camera.setFrustumPerspective(75.0, (float) camera.getWidth() / (float) camera.getHeight(), 0.1, 1000);
 
         // Create player object
         player = new PlayerBase();
         player.getPosition().set(0, 30, 0);
         FlyControl.setupTriggers(player, logicalLayer, Vector3.UNIT_Y, true);
 
-        // Create block world. Not setting any map file leads to automatic creation of a world.acr map file (which is
-        // overwritten at each run)
+        // Create block world settings.
         final WorldSettings settings = new WorldSettings();
         settings.setTerrainTexture(ResourceLocatorTool.locateResource(ResourceLocatorTool.TYPE_TEXTURE, "terrainQ.png"));
         settings.setTerrainTextureTileSize(16);
@@ -113,22 +108,12 @@ public class SimpleGame implements ArdorCraftGame {
                 height, gridSize, simpleSineGenerator, null));
         settings.setServerConnection(serverConnection);
 
+        // Create the actual world and put its world node under our main scenegraph node.
         blockWorld = new BlockWorld(settings);
         root.attachChild(blockWorld.getWorldNode());
 
+        // Start the processing!
         blockWorld.startThreads();
-    }
-
-    private void setupFog() {
-        final FogState fogState = new FogState();
-        fogState.setDensity(1.0f);
-        fogState.setEnabled(true);
-        fogState.setColor(fogColor);
-        fogState.setEnd((float) farPlane);
-        fogState.setStart((float) farPlane / 3.0f);
-        fogState.setDensityFunction(FogState.DensityFunction.Linear);
-        fogState.setQuality(FogState.Quality.PerPixel);
-        root.setRenderState(fogState);
     }
 
     @Override
@@ -137,20 +122,23 @@ public class SimpleGame implements ArdorCraftGame {
     @Override
     public void resize(final int newWidth, final int newHeight) {}
 
-    LayerDataGenerator simpleSineGenerator = new LayerDataGenerator(1, 0) {
+    /**
+     * A simple world based on a sine wave.
+     */
+    private final LayerDataGenerator simpleSineGenerator = new LayerDataGenerator(1, 5) {
         @Override
         public boolean isCave(final int x, final int y, final int z, final WorldModifier blockScene) {
-            return false;
+            return y > 10 && y < 15;
         }
 
         @Override
         public int getLayerType(final int layer, final int x, final int z, final WorldModifier blockScene) {
-            return 4;
+            return MathUtils.rand.nextInt(4) + 1;
         }
 
         @Override
         public int getLayerHeight(final int layer, final int x, final int y, final int z, final WorldModifier blockScene) {
-            return (int) (Math.abs(Math.sin(x * 0.1) * Math.cos(z * 0.1)) * height / 2);
+            return (int) (Math.abs(Math.sin(x * 0.05) * Math.cos(z * 0.05)) * height);
         }
     };
 }

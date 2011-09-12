@@ -40,7 +40,7 @@ public class GeneratorViewer {
     private static final Logger logger = Logger.getLogger(GeneratorViewer.class.getName());
 
     public static void main(final String[] args) {
-        new GeneratorViewer(new NiceDataGenerator(), 32, 150, 16);
+        new GeneratorViewer(new InterpolatedNoiseDataGenerator(), 32, 150, 16);
     }
 
     private int spacing = 1;
@@ -51,6 +51,9 @@ public class GeneratorViewer {
     private final int chunkHeight;
     private final int gridSize;
     private final int totalSize;
+
+    private int offsetX = 0;
+    private int offsetZ = 0;
 
     private final BufferedImage image;
     private final int[] data;
@@ -110,6 +113,45 @@ public class GeneratorViewer {
             }
         });
         controlPanel.add(spinner);
+
+        JButton button1;
+
+        button1 = new JButton("Left");
+        controlPanel.add(button1);
+        button1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                offsetX -= 16;
+                render();
+            }
+        });
+        button1 = new JButton("Right");
+        controlPanel.add(button1);
+        button1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                offsetX += 16;
+                render();
+            }
+        });
+        button1 = new JButton("Up");
+        controlPanel.add(button1);
+        button1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                offsetZ += 16;
+                render();
+            }
+        });
+        button1 = new JButton("Down");
+        controlPanel.add(button1);
+        button1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                offsetZ -= 16;
+                render();
+            }
+        });
 
         final JFrame frame = new JFrame("Terrain Cache Debug");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -190,9 +232,11 @@ public class GeneratorViewer {
 
         for (int x = from * spacing; x < to * spacing; x++) {
             for (int z = 0; z < gridSize * spacing; z++) {
-                generator.generateChunk(x * chunkWidth, z * chunkWidth, x * chunkWidth + chunkWidth, z * chunkWidth
+                final int xx = x + offsetX;
+                final int zz = z + offsetZ;
+                generator.generateChunk(xx * chunkWidth, zz * chunkWidth, xx * chunkWidth + chunkWidth, zz * chunkWidth
                         + chunkWidth, spacing, chunkHeight, worldEdit);
-                paintChunk(x, z, worldEdit);
+                paintChunk(MathUtils.moduloPositive(xx, gridSize), MathUtils.moduloPositive(zz, gridSize), worldEdit);
                 panel.repaint();
 
                 Thread.yield();

@@ -11,9 +11,9 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/lwjgl_util.jar"/>
 	<classpathentry kind="lib" path="lib/ardor3d-awt.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d-core.jar"/>
 	<classpathentry kind="lib" path="lib/ardor3d-lwjgl.jar"/>
 	<classpathentry kind="lib" path="lib/guava-r09.jar"/>
+	<classpathentry kind="lib" path="lib/ardor3d-core.jar"/>
 	<classpathentry kind="lib" path="lib/ArdorCraftAPI.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="jar:platform:/resource/ArdorCraftAPIExamples/lib/ArdorCraftAPIJavaDoc.zip!/"/>
