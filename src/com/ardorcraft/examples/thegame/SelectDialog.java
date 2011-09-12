@@ -64,6 +64,8 @@ public class SelectDialog extends JDialog {
     public SelectDialog() {
         super((Frame) null, "Setup", true);
 
+        setAlwaysOnTop(true);
+
         setBounds(100, 100, 331, 190);
         getContentPane().setLayout(new BorderLayout());
         contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
