@@ -184,7 +184,9 @@ public class AdvancedGame implements ArdorCraftGame {
     }
 
     @Override
-    public void destroy() {}
+    public void destroy() {
+        blockWorld.stopThreads();
+    }
 
     @Override
     public void resize(final int newWidth, final int newHeight) {}
