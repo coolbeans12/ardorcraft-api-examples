@@ -3,6 +3,8 @@
 
 = Features =
 
+(*Remember* - Since Ardorcraft is built on top of [http://ardor3d.com/ Ardor3D], all features of that powerful scenegraph engine can be used together with Ardorcraft effortlessly)
+
   * *Asynchronous loading/editing*
     * Supports loading and editing chunks fully asynchronously, to support loading all data from server (either locally or remotely). 
 
